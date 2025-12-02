@@ -4,6 +4,9 @@ package it.univaq.swa.soccorsoweb.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "patente")
 @Getter @Setter
@@ -21,4 +24,8 @@ public class Patente {
 
     @Column(columnDefinition = "TEXT")
     private String descrizione;
+
+    // Relazione One-to-Many con UserPatente
+    @OneToMany(mappedBy = "patente", cascade = CascadeType.ALL)
+    private Set<UserPatente> userPatenti = new HashSet<>();
 }

@@ -53,32 +53,26 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relazioni Many-to-Many con Role
+    // Relazioni Many-to-Many con Role (semplice, senza campi aggiuntivi)
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_roles",
+            name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
 
-    // Relazioni Many-to-Many con Patenti
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_patenti",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "patente_id")
-    )
-    private Set<Patente> patenti = new HashSet<>();
+    // Relazione One-to-Many con UserPatente (entity di relazione con campo conseguita_il)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserPatente> userPatenti = new HashSet<>();
 
-    // Relazioni Many-to-Many con Abilita
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "user_abilita",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "abilita_id")
-    )
-    private Set<Abilita> abilita = new HashSet<>();
+    // Relazione One-to-Many con UserAbilita (entity di relazione con campo livello)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserAbilita> userAbilita = new HashSet<>();
+
+    // Relazione One-to-Many con MissioneOperatore (entity di relazione)
+    @OneToMany(mappedBy = "operatore", cascade = CascadeType.ALL)
+    private Set<MissioneOperatore> missioniComeOperatore = new HashSet<>();
 
     // Missioni come caposquadra (One-to-Many)
     @OneToMany(mappedBy = "caposquadra")

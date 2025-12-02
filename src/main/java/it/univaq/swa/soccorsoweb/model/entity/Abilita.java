@@ -3,6 +3,9 @@ package it.univaq.swa.soccorsoweb.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "abilita")
 @Getter @Setter
@@ -20,4 +23,8 @@ public class Abilita {
 
     @Column(columnDefinition = "TEXT")
     private String descrizione;
+
+    // Relazione One-to-Many con UserAbilita
+    @OneToMany(mappedBy = "abilita", cascade = CascadeType.ALL)
+    private Set<UserAbilita> userAbilita = new HashSet<>();
 }

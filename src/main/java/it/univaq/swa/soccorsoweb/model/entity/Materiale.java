@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "materiale")
@@ -41,5 +43,9 @@ public class Materiale {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Relazione One-to-Many con MissioneMateriale
+    @OneToMany(mappedBy = "materiale", cascade = CascadeType.ALL)
+    private Set<MissioneMateriale> missioneMateriali = new HashSet<>();
 }
 

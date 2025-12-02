@@ -70,32 +70,17 @@ public class Missione {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relazione Many-to-Many con User (operatori squadra)
-    @ManyToMany
-    @JoinTable(
-            name = "missione_operatori",
-            joinColumns = @JoinColumn(name = "missione_id"),
-            inverseJoinColumns = @JoinColumn(name = "operatore_id")
-    )
-    private Set<User> operatori = new HashSet<>();
+    // Relazione One-to-Many con MissioneOperatore (entity di relazione)
+    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MissioneOperatore> missioneOperatori = new HashSet<>();
 
-    // Relazione Many-to-Many con Mezzi
-    @ManyToMany
-    @JoinTable(
-            name = "missione_mezzi",
-            joinColumns = @JoinColumn(name = "missione_id"),
-            inverseJoinColumns = @JoinColumn(name = "mezzo_id")
-    )
-    private Set<Mezzo> mezzi = new HashSet<>();
+    // Relazione One-to-Many con MissioneMezzo (entity di relazione)
+    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MissioneMezzo> missioneMezzi = new HashSet<>();
 
-    // Relazione Many-to-Many con Materiali
-    @ManyToMany
-    @JoinTable(
-            name = "missione_materiali",
-            joinColumns = @JoinColumn(name = "missione_id"),
-            inverseJoinColumns = @JoinColumn(name = "materiale_id")
-    )
-    private Set<Materiale> materiali = new HashSet<>();
+    // Relazione One-to-Many con MissioneMateriale (entity di relazione)
+    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MissioneMateriale> missioneMateriali = new HashSet<>();
 
     // Relazione One-to-Many con Aggiornamenti
     @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL)
