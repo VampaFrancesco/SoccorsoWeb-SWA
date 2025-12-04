@@ -1,3 +1,15 @@
+/**
+ * 3. 🔐 Spring Security Filter Chain
+ *    a) JWTAuthenticationFilter
+ *       - Controlla se c'è un token JWT nell'header
+ *       - Per /auth/login è .permitAll() → SALTA la validazione JWT
+ *       - Passa avanti ✅
+
+ *    b) SecurityFilterChain
+ *       - Verifica le regole di autorizzazione
+ *       - /auth/** è .permitAll() → OK, può passare ✅
+ */
+
 package it.univaq.swa.soccorsoweb.security.config;
 
 import it.univaq.swa.soccorsoweb.security.jwt.JWTAuthenticationFilter;
@@ -9,6 +21,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,9 +46,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/swa/open/**").permitAll()
+                        .requestMatchers("/auth/open/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -46,6 +61,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

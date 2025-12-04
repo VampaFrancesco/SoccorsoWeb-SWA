@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>it.univaq.swa</groupId>
 	<artifactId>soccorsoweb-services</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.2.1</version>
 	<name> SoccorsoWeb Services</name>
 	<description>Progetto di sviluppo web avanzato</description>
 

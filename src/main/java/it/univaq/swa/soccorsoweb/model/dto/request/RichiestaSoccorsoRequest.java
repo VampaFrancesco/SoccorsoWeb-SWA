@@ -1,5 +1,7 @@
 package it.univaq.swa.soccorsoweb.model.dto.request;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RichiestaSoccorsoRequest {
 
     @NotBlank(message = "La descrizione è obbligatoria")
@@ -22,8 +25,10 @@ public class RichiestaSoccorsoRequest {
     @NotBlank(message = "L'indirizzo è obbligatorio")
     private String indirizzo;
 
+    @NotNull(message = "La latitudine è obbligatoria")
     private BigDecimal latitudine;
 
+    @NotNull(message = "La longitudine è obbligatoria")
     private BigDecimal longitudine;
 
     @NotBlank(message = "Il nome del segnalante è obbligatorio")
