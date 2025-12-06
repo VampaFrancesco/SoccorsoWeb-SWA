@@ -1,13 +1,22 @@
 package it.univaq.swa.soccorsoweb.exception;
 
+import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.BadCredentialsException;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,6 +35,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), error.getDefaultMessage());
+        });
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Dati di input non validi"
@@ -33,8 +46,6 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Validation Error");
         return problemDetail;
     }
-
-
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
@@ -46,5 +57,64 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Internal Server Error");
         return problemDetail;
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Messaggio HTTP non leggibile"
+        );
+        problemDetail.setTitle("HTTP Message Not Readable");
+        return problemDetail;
+    }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "Non è stato possibile creare l'entità a causa di una violazione dell'integrità dei dati"
+        );
+        problemDetail.setTitle("Data Integrity Violation");
+        ex.printStackTrace();
+        return problemDetail;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ProblemDetail handleEntityNotFound(EntityNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
+        problemDetail.setTitle("Entità non presente nel database");
+        return problemDetail;
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler({MessagingException.class, MailException.class})
+    public ProblemDetail handleEmailError(Exception ex) {
+                ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Impossibile completare l'operazione: errore nell'invio dell'email di convalida"
+        );
+        problemDetail.setTitle("Errore invio email");
+        return problemDetail;
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(HttpClientErrorException.TooManyRequests.class)
+    public ProblemDetail handleTooManyRequest(HttpClientErrorException.TooManyRequests ex) {
+                ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Impossibile completare l'operazione: errore nell'invio dell'email di convalida"
+        );
+        problemDetail.setTitle("Errore invio email");
+        return problemDetail;
+    }
+
+
+
 
 }

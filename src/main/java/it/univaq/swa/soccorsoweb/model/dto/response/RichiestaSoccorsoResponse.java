@@ -30,4 +30,6 @@ public class RichiestaSoccorsoResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long missioneId;
+    private String ipOrigine;
+    private String tokenConvalida;
 }
