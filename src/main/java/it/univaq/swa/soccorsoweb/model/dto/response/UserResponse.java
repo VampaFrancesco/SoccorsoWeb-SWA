@@ -25,10 +25,9 @@ public class UserResponse {
     private String telefono;
     private String indirizzo;
     private Boolean attivo;
+    private Boolean disponibile;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<RoleResponse> roles;
-    private Set<PatenteResponse> patenti;
-    private Set<AbilitaResponse> abilita;
     private String token;  // JWT token per autenticazione
 }

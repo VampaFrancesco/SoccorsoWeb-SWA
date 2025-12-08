@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,7 +18,5 @@ public class MissioneOperatoreResponse {
     private String operatoreNome;
     private String operatoreCognome;
     private String operatoreEmail;
-    private LocalDateTime notificatoAt;
-    private LocalDateTime assegnatoAt;
 }
 

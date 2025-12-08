@@ -3,6 +3,7 @@ package it.univaq.swa.soccorsoweb.model.dto.request;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,19 +19,19 @@ import java.util.Set;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class MissioneRequest {
 
+    @NotNull(message = "L'ID della richiesta è obbligatorio")
+    private Long richiestaId;
+
     @NotBlank(message = "L'obiettivo è obbligatorio")
     private String obiettivo;
 
+    @NotNull(message = "Il caposquadra è obbligatorio")
+    private Long caposquadraId;
+
     private String posizione;
-
     private BigDecimal latitudine;
-
     private BigDecimal longitudine;
 
-    // IDs per le relazioni che verranno gestite dal service
-    private Long richiestaId;
-    private Long caposquadraId;
+    // IDs operatori da assegnare
     private Set<Long> operatoriIds;
-    private Set<Long> mezziIds;
-    private Set<Long> materialiIds;
 }

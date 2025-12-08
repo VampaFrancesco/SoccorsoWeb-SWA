@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -119,36 +120,5 @@ public class RichiestaService {
             ip = ip.split(",")[0].trim();
         }
         return ip;
-    }
-
-    public List<RichiestaSoccorsoResponse> richiesteValutateNegative() {
-
-        List<RichiestaSoccorso> list;
-        return richiestaSoccorsoMapper.toResponseList(list = richiestaSoccorsoRepository.findAllByLivelloSuccesso());
-
-
-    }
-
-    @Transactional
-    public RichiestaSoccorsoResponse chiudiSoccorso(Long idSoccorso, String stato) throws MessagingException {
-        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(idSoccorso)
-                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + idSoccorso));
-
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.valueOf(stato.toUpperCase()));
-        richiesta.setUpdatedAt(LocalDateTime.now());
-        emailService.inviaEmailChiusuraSoccorso(
-                richiesta.getEmailSegnalante(),
-                richiesta.getNomeSegnalante(),
-                richiesta.getStato().toString(),
-                String.valueOf(System.currentTimeMillis()),
-                richiesta.getId()
-
-        );
-        return richiestaSoccorsoMapper.toResponse(richiestaSoccorsoRepository.save(richiesta));
-    }
-
-
-    public void eliminaRichiesta(Long id) {
-        richiestaSoccorsoRepository.deleteById(id);
     }
 }

@@ -32,7 +32,5 @@ public class MissioneResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<UserResponse> operatori;
-    private Set<MezzoResponse> mezzi;
-    private Set<MaterialeResponse> materiali;
     private Integer numeroOperatori;
 }

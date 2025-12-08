@@ -68,13 +68,6 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // Relazione One-to-Many con UserPatente (entity di relazione con campo conseguita_il)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserPatente> userPatenti = new HashSet<>();
-
-    // Relazione One-to-Many con UserAbilita (entity di relazione con campo livello)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserAbilita> userAbilita = new HashSet<>();
 
     // Relazione One-to-Many con MissioneOperatore (entity di relazione)
     @OneToMany(mappedBy = "operatore", cascade = CascadeType.ALL)

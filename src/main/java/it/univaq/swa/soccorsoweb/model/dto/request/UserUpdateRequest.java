@@ -29,4 +29,6 @@ public class UserUpdateRequest {
     private String telefono;
 
     private String indirizzo;
+
+    private Boolean disponibile;
 }

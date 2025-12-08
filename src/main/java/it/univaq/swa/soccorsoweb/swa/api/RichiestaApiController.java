@@ -40,39 +40,7 @@ public class RichiestaApiController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * API 5: Visualizza richieste non positive < 5
-     * @return ResponseEntity<List<RichiestaSoccorsoResponse>>
-     */
-    @GetMapping("/richieste-non-positive")
-    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
-    public ResponseEntity<List<RichiestaSoccorsoResponse>> richiesteValutateNegative() {
-        return ResponseEntity.ok().body(richiestaService.richiesteValutateNegative());
-    }
 
 
-    /** API di supporto: modifica stato richiesta
-     * Metodo per la modifica dello stato di una richiesta di soccorso
-     * @param id
-     * @param nuovoStato
-     * @return ResponseEntity<RichiestaSoccorsoResponse>
-     */
-    @PutMapping("/modifica-stato/{id}/{nuovoStato}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
-    public ResponseEntity<RichiestaSoccorsoResponse> modificaStatoRichiesta(
-            @PathVariable Long id,
-            @PathVariable String nuovoStato) throws MessagingException {
-        RichiestaSoccorsoResponse response = richiestaService.chiudiSoccorso(id, nuovoStato);
-        if (response != null) {
-            return ResponseEntity.ok().body(response);
-        }
-        return ResponseEntity.noContent().build();
-    }
 
-    @DeleteMapping("/elimina-richiesta/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> eliminaRichiesta(@PathVariable Long id) {
-        richiestaService.eliminaRichiesta(id);
-        return ResponseEntity.noContent().build();
-    }
 }

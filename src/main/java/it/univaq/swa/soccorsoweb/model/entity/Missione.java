@@ -74,17 +74,6 @@ public class Missione {
     @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MissioneOperatore> missioneOperatori = new HashSet<>();
 
-    // Relazione One-to-Many con MissioneMezzo (entity di relazione)
-    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MissioneMezzo> missioneMezzi = new HashSet<>();
-
-    // Relazione One-to-Many con MissioneMateriale (entity di relazione)
-    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MissioneMateriale> missioneMateriali = new HashSet<>();
-
-    // Relazione One-to-Many con Aggiornamenti
-    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL)
-    private Set<AggiornamentoMissione> aggiornamenti = new HashSet<>();
 
     // Enum per lo stato
     public enum StatoMissione {

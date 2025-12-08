@@ -13,6 +13,4 @@ public interface RichiestaSoccorsoRepository extends JpaRepository<RichiestaSocc
 
     List<RichiestaSoccorso> findAllByStato(RichiestaSoccorso.StatoRichiesta stato);
 
-    @Query("SELECT r FROM RichiestaSoccorso r WHERE r.livelloSuccesso <= 5")
-    List<RichiestaSoccorso> findAllByLivelloSuccesso();
 }

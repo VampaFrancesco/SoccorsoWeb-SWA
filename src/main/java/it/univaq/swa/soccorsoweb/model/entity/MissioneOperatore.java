@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "missione_operatori")
@@ -27,11 +26,6 @@ public class MissioneOperatore {
     @JoinColumn(name = "operatore_id")
     private User operatore;
 
-    @Column(name = "notificato_at")
-    private LocalDateTime notificatoAt;
-
-    @Column(name = "assegnato_at")
-    private LocalDateTime assegnatoAt;
 
     // Classe per la chiave composta
     @Embeddable
