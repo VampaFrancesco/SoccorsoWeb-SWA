@@ -1,4 +1,4 @@
-package it.univaq.swa.soccorsoweb.controller;
+package it.univaq.swa.soccorsoweb.swa.open;
 
 import it.univaq.swa.soccorsoweb.model.dto.request.RichiestaSoccorsoRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.RichiestaSoccorsoResponse;
@@ -14,14 +14,21 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/swa/open/richiesta")
-public class RichiestaController {
+public class RichiestaOpenController {
 
     private final RichiestaService richiestaService;
 
-    public RichiestaController(RichiestaService richiestaService) {
+    public RichiestaOpenController(RichiestaService richiestaService) {
         this.richiestaService = richiestaService;
     }
 
+    /**
+     * API 2: Invia nuova richiesta di soccorso
+     * @param richiestaSoccorsoRequest
+     * @param request
+     * @return ResponseEntity<RichiestaSoccorsoResponse>
+     * @throws MessagingException
+     */
     @PostMapping("/nuova-richiesta")
     public ResponseEntity<RichiestaSoccorsoResponse> nuovaRichiesta(
             @Valid @RequestBody RichiestaSoccorsoRequest richiestaSoccorsoRequest,
@@ -34,8 +41,12 @@ public class RichiestaController {
                 .created(URI.create("/swa/open/richiesta/" + response.getId()))
                 .body(response);
     }
-
-    // ✅ Lancia eccezioni gestite da GlobalExceptionHandler
+    /**
+     * API 3: Convalida richiesta di soccorso
+     * @param id
+     * @param token
+     * @return ResponseEntity<Map<String, Object>>
+     */
     @GetMapping("/{id}/convalida/{token}")
     public ResponseEntity<Map<String, Object>> convalidaRichiesta(
             @PathVariable Long id,
@@ -48,11 +59,5 @@ public class RichiestaController {
                 "id", id,
                 "timestamp", java.time.LocalDateTime.now()
         ));
-    }
-
-    @GetMapping("/convalidate/count")
-    public ResponseEntity<Map<String, Long>> contaRichiesteConvalidate() {
-        long count = richiestaService.contaRichiesteConvalidate();
-        return ResponseEntity.ok(Map.of("count", count));
     }
 }

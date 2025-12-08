@@ -17,6 +17,9 @@ public class EmailService {
     @Value("${spring.mail.username:noreply@soccorsoweb.it}")
     private String fromEmail;
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -81,8 +84,67 @@ public class EmailService {
 
             mailSender.send(message);
             log.info("✅ Email inviata con successo a: {}", toEmail);
-
-
     }
+
+    public void inviaEmailChiusuraSoccorso(String toEmail, String nomeSegnalante, String descrizione, String dataChiusura, Long idSoccorso) throws MessagingException {
+        log.info("📧 Invio email di chiusura soccorso a: {}", toEmail);
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setFrom(fromEmail);
+        helper.setTo(toEmail);
+        helper.setSubject("✅ Soccorso concluso - SoccorsoWeb");
+
+        // Link che punta alla pagina HTML statica con ID nel path
+        String linkFeedback = baseUrl + "/swa/open/feedback/" + idSoccorso;
+
+        String htmlContent = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background-color: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+            .content { background-color: #f8f9fa; padding: 30px; border-radius: 0 0 5px 5px; }
+            .info-box { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0; }
+            .button { display: inline-block; padding: 15px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+            .footer { margin-top: 20px; font-size: 12px; color: #666; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>✅ SoccorsoWeb</h1>
+            </div>
+            <div class="content">
+                <h2>Ciao %s,</h2>
+                <p>Ti informiamo che la tua <strong>richiesta di soccorso</strong> è stata <strong>chiusa</strong>.</p>
+                <div class="info-box">
+                    <p><strong>Descrizione:</strong> %s</p>
+                    <p><strong>Data chiusura:</strong> %s</p>
+                </div>
+                <p>Ci piacerebbe conoscere la tua opinione sul servizio ricevuto.</p>
+                <div style="text-align: center;">
+                    <a href="%s" class="button">⭐ Valuta il servizio</a>
+                </div>
+                <p>Grazie per aver utilizzato il nostro servizio.</p>
+            </div>
+            <div class="footer">
+                <p>Questa è un'email automatica, non rispondere.</p>
+                <p>&copy; 2025 SoccorsoWeb - Sistema di gestione emergenze</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """.formatted(nomeSegnalante, descrizione, dataChiusura, linkFeedback);
+
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+        log.info("✅ Email di chiusura inviata con successo a: {}", toEmail);
+    }
+
 }
 

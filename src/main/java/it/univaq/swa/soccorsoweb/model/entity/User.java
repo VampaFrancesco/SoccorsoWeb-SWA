@@ -11,7 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "user", indexes = {
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_attivo", columnList = "attivo")
+})
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor

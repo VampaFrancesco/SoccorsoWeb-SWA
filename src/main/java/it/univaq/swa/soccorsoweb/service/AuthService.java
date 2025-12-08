@@ -25,10 +25,12 @@ package it.univaq.swa.soccorsoweb.service;
 
 import it.univaq.swa.soccorsoweb.mapper.UserMapper;
 import it.univaq.swa.soccorsoweb.model.dto.request.LoginRequest;
+import it.univaq.swa.soccorsoweb.model.dto.request.UserRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.UserResponse;
 import it.univaq.swa.soccorsoweb.model.entity.User;
 import it.univaq.swa.soccorsoweb.repository.UserRepository;
 import it.univaq.swa.soccorsoweb.security.jwt.JWTUtil;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +38,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -96,5 +99,14 @@ public class AuthService {
 
         // For now, we'll just return a simple response indicating logout was successful.
         return "Logout successful";
+    }
+
+    public UserResponse signUp(@Valid UserRequest userRequest) {
+        if (userRepository.findByEmail(userRequest.getEmail()).isPresent() || userRequest.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Email già in uso");
+        }
+        User user = userMapper.toEntity(userRequest);
+        user.setPassword(BCrypt.hashpw(userRequest.getPassword(), BCrypt.gensalt()));
+        return userMapper.toResponse(userRepository.save(user));
     }
 }

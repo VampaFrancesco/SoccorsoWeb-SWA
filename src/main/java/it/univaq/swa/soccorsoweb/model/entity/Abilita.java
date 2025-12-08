@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "abilita")
+@Table(name = "abilita", indexes = {
+        @Index(name = "idx_nome", columnList = "nome")
+})
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor

@@ -88,6 +88,6 @@ public class Missione {
 
     // Enum per lo stato
     public enum StatoMissione {
-        IN_CORSO, CHIUSA
+        IN_CORSO, CHIUSA, FALLITA
     }
 }

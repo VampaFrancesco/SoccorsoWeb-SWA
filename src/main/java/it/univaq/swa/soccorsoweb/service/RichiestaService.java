@@ -8,11 +8,16 @@ import it.univaq.swa.soccorsoweb.repository.RichiestaSoccorsoRepository;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -89,6 +94,16 @@ public class RichiestaService {
         log.info("✅ Richiesta ID: {} convalidata con successo", id);
     }
 
+    public List<RichiestaSoccorsoResponse> richiesteFiltrate(@NotNull
+                                                             String stato) {
+        List<RichiestaSoccorso> list;
+        RichiestaSoccorso.StatoRichiesta statoEnum = RichiestaSoccorso.StatoRichiesta.valueOf(stato.toUpperCase());
+            if (stato != null && !stato.isEmpty()) {
+                return richiestaSoccorsoMapper.toResponseList(list = richiestaSoccorsoRepository.findAllByStato(statoEnum));
+            }
+            return null;
+        }
+
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
 
@@ -103,11 +118,35 @@ public class RichiestaService {
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
         }
-
         return ip;
     }
 
-    public long contaRichiesteConvalidate() {
-        return richiestaSoccorsoRepository.countByStato(RichiestaSoccorso.StatoRichiesta.CONVALIDATA);
+    public List<RichiestaSoccorsoResponse> richiesteValutateNegative() {
+
+        List<RichiestaSoccorso> list;
+        return richiestaSoccorsoMapper.toResponseList(list = richiestaSoccorsoRepository.findAllByLivelloSuccesso());
+
+
     }
+
+    @Transactional
+    public RichiestaSoccorsoResponse chiudiSoccorso(Long idSoccorso, String stato) throws MessagingException {
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(idSoccorso)
+                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + idSoccorso));
+
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.valueOf(stato.toUpperCase()));
+        richiesta.setUpdatedAt(LocalDateTime.now());
+        emailService.inviaEmailChiusuraSoccorso(
+                richiesta.getEmailSegnalante(),
+                richiesta.getNomeSegnalante(),
+                richiesta.getStato().toString(),
+                String.valueOf(System.currentTimeMillis()),
+                richiesta.getId()
+
+        );
+        return richiestaSoccorsoMapper.toResponse(richiestaSoccorsoRepository.save(richiesta));
+    }
+
+
+
 }

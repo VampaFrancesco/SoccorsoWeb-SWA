@@ -26,13 +26,11 @@ public class RichiestaSoccorsoRequest {
     private String indirizzo;
 
 
-    @NotNull(message = "La latitudine è obbligatoria")
     @DecimalMin(value = "-90.0", message = "La latitudine deve essere >= -90")
     @DecimalMax(value = "90.0", message = "La latitudine deve essere <= 90")
     private BigDecimal latitudine;
 
 
-    @NotNull(message = "La longitudine è obbligatoria")
     @DecimalMin(value = "-180.0", message = "La longitudine deve essere >= -180")
     @DecimalMax(value = "180.0", message = "La longitudine deve essere <= 180")
     private BigDecimal longitudine;
