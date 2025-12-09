@@ -76,4 +76,14 @@ public class User {
     // Missioni come caposquadra (One-to-Many)
     @OneToMany(mappedBy = "caposquadra")
     private Set<Missione> missioniComeCaposquadra = new HashSet<>();
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

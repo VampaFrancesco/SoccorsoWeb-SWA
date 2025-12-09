@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -124,6 +125,18 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Argomento non valido per l'URL richiesto.");
         return problemDetail;
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(RoleNotFoundException.class)
+    public ProblemDetail handleRoleNotFound(RoleNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        problemDetail.setTitle("Argomento non valido per l'URL richiesto.");
+        return problemDetail;
+    }
+
 
 
 

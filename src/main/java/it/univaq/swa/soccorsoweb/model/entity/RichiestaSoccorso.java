@@ -78,4 +78,14 @@ public class RichiestaSoccorso {
     public enum StatoRichiesta {
         INVIATA, ATTIVA, IN_CORSO, CHIUSA, IGNORATA, CONVALIDATA
     }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

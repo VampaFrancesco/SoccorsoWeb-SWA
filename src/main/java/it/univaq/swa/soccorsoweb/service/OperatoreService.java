@@ -4,9 +4,11 @@ import it.univaq.swa.soccorsoweb.mapper.UserMapper;
 import it.univaq.swa.soccorsoweb.model.dto.response.UserResponse;
 import it.univaq.swa.soccorsoweb.model.entity.User;
 import it.univaq.swa.soccorsoweb.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.RoleNotFoundException;
 import java.util.List;
 
 @Slf4j
@@ -38,5 +40,16 @@ public class OperatoreService {
         log.info("Operatore disponibile: {} ", operatori.toString());
 
         return userMapper.toResponseList(operatori);
+    }
+
+    public UserResponse dettagliOperatore(Long id){
+
+        User operatore = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Operatore non trovato con ID: " + id));
+        if(operatore.getRoles().stream().noneMatch(role -> role.getName().equals("OPERATORE"))) {
+            log.info("Gli operatori hanno matchato");
+            return null;}
+        return userMapper.toResponse(operatore);
+
     }
 }

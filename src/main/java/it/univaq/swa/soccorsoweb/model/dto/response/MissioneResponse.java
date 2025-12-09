@@ -33,4 +33,5 @@ public class MissioneResponse {
     private LocalDateTime updatedAt;
     private Set<UserResponse> operatori;
     private Integer numeroOperatori;
+    private RichiestaSoccorsoResponse richiesta;
 }

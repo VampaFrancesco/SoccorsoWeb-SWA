@@ -34,6 +34,7 @@ public interface MissioneMapper {
 
     // ========== Entity → Response ==========
     @Mapping(target = "richiestaId", source = "richiesta.id")
+    @Mapping(target = "richiesta", source = "richiesta")
     @Mapping(target = "numeroOperatori", expression = "java(entity.getMissioneOperatori() != null ? entity.getMissioneOperatori().size() : 0)")
     @Mapping(target = "operatori", expression = "java(mapMissioneOperatoriToUsers(entity))")
     MissioneResponse toResponse(Missione entity);

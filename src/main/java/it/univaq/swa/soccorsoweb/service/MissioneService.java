@@ -11,8 +11,10 @@ import it.univaq.swa.soccorsoweb.repository.MissioneRepository;
 import it.univaq.swa.soccorsoweb.repository.RichiestaSoccorsoRepository;
 import it.univaq.swa.soccorsoweb.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,48 +31,8 @@ public class MissioneService {
     private final MissioneRepository missioneRepository;
     private final MissioneMapper missioneMapper;
     private final RichiestaSoccorsoRepository richiestaSoccorsoRepository;
+    private final RichiestaService richiestaService;
     private final UserRepository userRepository;
-
-    @Transactional
-    public MissioneResponse assegnaMissione(MissioneRequest missioneRequest) {
-        // Carica la richiesta di soccorso
-        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(missioneRequest.getRichiestaId())
-                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + missioneRequest.getRichiestaId()));
-
-        // Carica il caposquadra
-        User caposquadra = userRepository.findById(missioneRequest.getCaposquadraId())
-                .orElseThrow(() -> new EntityNotFoundException("Caposquadra non trovato con ID: " + missioneRequest.getCaposquadraId()));
-
-        // Crea la missione usando il mapper
-        Missione missione = missioneMapper.toEntity(missioneRequest);
-        missione.setRichiesta(richiesta);
-        missione.setCaposquadra(caposquadra);
-        missione.setCreatedAt(LocalDateTime.now());
-
-        // Gestisce gli operatori se presenti
-        if (missioneRequest.getOperatoriIds() != null && !missioneRequest.getOperatoriIds().isEmpty()) {
-            Set<MissioneOperatore> missioneOperatori = new HashSet<>();
-            for (Long operatoreId : missioneRequest.getOperatoriIds()) {
-                User operatore = userRepository.findById(operatoreId)
-                        .orElseThrow(() -> new EntityNotFoundException("Operatore non trovato con ID: " + operatoreId));
-
-                MissioneOperatore missioneOperatore = new MissioneOperatore();
-                MissioneOperatore.MissioneOperatoreId id = new MissioneOperatore.MissioneOperatoreId();
-                missioneOperatore.setId(id);
-                missioneOperatore.setMissione(missione);
-                missioneOperatore.setOperatore(operatore);
-                missioneOperatori.add(missioneOperatore);
-            }
-            missione.setMissioneOperatori(missioneOperatori);
-        }
-
-        // Aggiorna lo stato della richiesta
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.IN_CORSO);
-
-        // Salva la missione
-        Missione missioneSalvata = missioneRepository.save(missione);
-        return missioneMapper.toResponse(missioneSalvata);
-    }
 
     public List<MissioneResponse> missioniValutateNegative() {
         return missioneMapper.toResponseList(missioneRepository.findAllByLivelloSuccesso());
@@ -78,73 +40,31 @@ public class MissioneService {
 
     @Transactional
     public MissioneResponse modificaMissione(Long id, String stato) {
-        log.info("🔵 INIZIO modificaMissione - ID: {}, Stato ricevuto: '{}'", id, stato);
+        //Cerca la missione
+        Missione missione = missioneRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
+        Missione.StatoMissione nuovoStato;
+        nuovoStato = Missione.StatoMissione.valueOf(stato.toUpperCase());
+        missione.setStato(nuovoStato);
+        missione.setUpdatedAt(LocalDateTime.now());
 
-        try {
-            // 1. Cerca la missione
-            log.info("🔍 Cerco missione con ID: {}", id);
-            Missione missione = missioneRepository.findById(id)
-                    .orElseThrow(() -> {
-                        log.error("❌ Missione non trovata con ID: {}", id);
-                        return new EntityNotFoundException("Missione non trovata con ID: " + id);
-                    });
-            log.info("✅ Missione trovata: ID={}, Stato attuale={}", missione.getId(), missione.getStato());
-
-            // 2. Converte lo stato in maiuscolo
-            String statoUpper = stato.toUpperCase();
-            log.info("🔄 Stato convertito in maiuscolo: '{}'", statoUpper);
-
-            // 3. Valida che lo stato esista nell'enum
-            Missione.StatoMissione nuovoStato;
-            try {
-                nuovoStato = Missione.StatoMissione.valueOf(statoUpper);
-                log.info("✅ Stato validato correttamente: {}", nuovoStato);
-            } catch (IllegalArgumentException e) {
-                log.error("❌ Stato non valido: '{}'. Valori ammessi: IN_CORSO, CHIUSA, FALLITA", stato);
-                throw new IllegalArgumentException("Stato non valido: " + stato + ". Valori ammessi: IN_CORSO, CHIUSA, FALLITA");
-            }
-
-            // 4. Imposta il nuovo stato
-            log.info("📝 Imposto nuovo stato: {} -> {}", missione.getStato(), nuovoStato);
-            missione.setStato(nuovoStato);
-            missione.setUpdatedAt(LocalDateTime.now());
-
-            // 5. Se la missione viene chiusa o fallita, imposta anche la data di fine
-            if (nuovoStato == Missione.StatoMissione.CHIUSA || nuovoStato == Missione.StatoMissione.FALLITA) {
-                log.info("⏰ Imposto fineAt perché stato è: {}", nuovoStato);
-                missione.setFineAt(LocalDateTime.now());
-
-                // 6. Aggiorna anche lo stato della richiesta
-                RichiestaSoccorso richiesta = missione.getRichiesta();
-                if (richiesta != null) {
-                    log.info("🔗 Aggiorno stato richiesta collegata (ID: {})", richiesta.getId());
-                    RichiestaSoccorso.StatoRichiesta statoRichiesta =
+        //Se la missione viene chiusa o fallita, imposta anche la data di fine
+        if (nuovoStato == Missione.StatoMissione.CHIUSA || nuovoStato == Missione.StatoMissione.FALLITA) {
+            missione.setFineAt(LocalDateTime.now());
+            //Aggiorna anche lo stato della richiesta
+            RichiestaSoccorso richiesta = missione.getRichiesta();
+            if (richiesta != null) {
+                RichiestaSoccorso.StatoRichiesta statoRichiesta =
                         nuovoStato == Missione.StatoMissione.CHIUSA
-                            ? RichiestaSoccorso.StatoRichiesta.CHIUSA
-                            : RichiestaSoccorso.StatoRichiesta.IGNORATA;
-                    richiesta.setStato(statoRichiesta);
-                    log.info("✅ Stato richiesta impostato a: {}", statoRichiesta);
-                } else {
-                    log.warn("⚠️ Nessuna richiesta collegata alla missione");
-                }
+                                ? RichiestaSoccorso.StatoRichiesta.CHIUSA
+                                : RichiestaSoccorso.StatoRichiesta.IGNORATA;
+                richiesta.setStato(statoRichiesta);
             }
-
-            // 7. Salva la missione
-            log.info("💾 Salvo la missione aggiornata...");
-            Missione missioneSalvata = missioneRepository.save(missione);
-            log.info("✅ Missione salvata con successo");
-
-            // 8. Converte in response
-            log.info("🔄 Converto la missione in MissioneResponse...");
-            MissioneResponse response = missioneMapper.toResponse(missioneSalvata);
-            log.info("✅ FINE modificaMissione - Response creata con successo");
-
-            return response;
-
-        } catch (Exception e) {
-            log.error("❌❌❌ ERRORE in modificaMissione: {}", e.getMessage(), e);
-            throw e;
         }
+
+
+        Missione missioneSalvata = missioneRepository.save(missione);
+        return missioneMapper.toResponse(missioneSalvata);
     }
 
     @Transactional
@@ -161,4 +81,79 @@ public class MissioneService {
         missioneRepository.deleteById(id);
     }
 
+    @Transactional
+    public MissioneResponse inserisciMissione(@Valid MissioneRequest missioneRequest) {
+
+        //ottengo caposquadra
+        User caposquadra = userRepository.findById(missioneRequest.getCaposquadraId()).orElseThrow();
+
+        //ottengo richiesta
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(missioneRequest.getRichiestaId()).orElseThrow();
+
+        //creo missione
+        Missione missione = missioneMapper.toEntity(missioneRequest);
+
+        //setto caposquadra e richiesta
+        missione.setCaposquadra(caposquadra);
+        missione.setRichiesta(richiesta);
+
+        //gestisco operatori
+        if (missioneRequest.getOperatoriIds() != null && !missioneRequest.getOperatoriIds().isEmpty()) {
+            Set<MissioneOperatore> missioneOperatori = new HashSet<>();
+            List<User> operatori = userRepository.findAllById(missioneRequest.getOperatoriIds());
+            for (User operatore : operatori) {
+                MissioneOperatore missioneOperatore = new MissioneOperatore();
+                missioneOperatore.setOperatore(operatore);
+                missioneOperatore.setMissione(missione);
+                MissioneOperatore.MissioneOperatoreId id = new MissioneOperatore.MissioneOperatoreId();
+                id.setMissioneId(missione.getId());
+                id.setOperatoreId(operatore.getId());
+                missioneOperatore.setId(id);
+                missioneOperatori.add(missioneOperatore);
+            }
+        }else{
+            missione.setMissioneOperatori(new HashSet<>());
+        }
+            return missioneMapper.toResponse(missioneRepository.save(missione));
+    }
+
+    public MissioneResponse chiudiMissione(Long id) {
+
+        Missione missione = missioneRepository.findById(id).orElseThrow();
+        missione.setStato(Missione.StatoMissione.CHIUSA);
+        richiestaService.modificaRichiesta(missione.getRichiesta().getId(), "CHIUSA");
+        missione.setFineAt(LocalDateTime.now());
+        Missione missioneSalvata = missioneRepository.save(missione);
+        return missioneMapper.toResponse(missioneSalvata);
+    }
+
+    public MissioneResponse valutaMissione(Long id, Integer livelloSuccesso) {
+        Missione missione = missioneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
+        missione.setLivelloSuccesso(livelloSuccesso);
+        Missione missioneSalvata = missioneRepository.save(missione);
+        return missioneMapper.toResponse(missioneSalvata);
+    }
+
+
+    @Transactional
+    public MissioneResponse annullaMissione(Long id) {
+        Missione missione = missioneRepository.findById(id).orElseThrow();
+        RichiestaSoccorso richiesta = missione.getRichiesta();
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.IGNORATA); // Placeholder per stato annullato
+        missione.setRichiesta(richiesta);
+        missione.setStato(Missione.StatoMissione.ANNULLATA);
+        Missione missioneSalvata = missioneRepository.saveAndFlush(missione);
+        return missioneMapper.toResponse(missioneSalvata);
+
+    }
+
+    public MissioneResponse dettagliMissione(Long id) {
+        Missione missione = missioneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
+        return missioneMapper.toResponse(missione);
+    }
+
+    public List<MissioneResponse> missioniOperatore(Long id) {
+        List<Missione> missioni = missioneRepository.findAllByOperatoreId(id);
+        return missioneMapper.toResponseList(missioni);
+    }
 }

@@ -2,6 +2,8 @@
 -- DATABASE SWA - VERSIONE FINALE
 -- Compatibile con il tuo codice esistente
 -- ========================================
+-- CHARSET e COLLATION per supporto UTF-8 completo
+-- InnoDB per supporto transazioni e chiavi esterne
 
 DROP DATABASE IF EXISTS soccorsodb;
 CREATE DATABASE soccorsodb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -84,10 +86,10 @@ CREATE TABLE missione (
                           posizione VARCHAR(255) NULL,
                           latitudine DECIMAL(10, 8) NULL,
                           longitudine DECIMAL(11, 8) NULL,
-                          stato ENUM('IN_CORSO', 'CHIUSA', 'FALLITA') NOT NULL DEFAULT 'IN_CORSO',
+                          stato ENUM('IN_CORSO', 'CHIUSA', 'FALLITA', 'ANNULLATA') NOT NULL DEFAULT 'IN_CORSO',
                           inizio_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                           fine_at TIMESTAMP NULL,
-                          livello_successo INT NULL CHECK (livello_successo BETWEEN 1 AND 5),
+                          livello_successo INT NULL CHECK (livello_successo BETWEEN 1 AND 10),
                           commenti_finali TEXT NULL,
                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -1,9 +1,12 @@
 package it.univaq.swa.soccorsoweb.model.entity;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -77,6 +80,18 @@ public class Missione {
 
     // Enum per lo stato
     public enum StatoMissione {
-        IN_CORSO, CHIUSA, FALLITA
+        IN_CORSO, CHIUSA, FALLITA, ANNULLATA
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.inizioAt = LocalDateTime.now();
+        this.stato = StatoMissione.IN_CORSO;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 }

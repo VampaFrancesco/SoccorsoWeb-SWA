@@ -121,4 +121,23 @@ public class RichiestaService {
         }
         return ip;
     }
+
+    public void eliminaRichiesta(Long id) {
+        richiestaSoccorsoRepository.deleteById(id);
+    }
+
+    public RichiestaSoccorsoResponse modificaRichiesta(Long id, String nuovoStato) {
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
+        RichiestaSoccorso.StatoRichiesta statoEnum = RichiestaSoccorso.StatoRichiesta.valueOf(nuovoStato.toUpperCase());
+        richiesta.setStato(statoEnum);
+        richiesta.setUpdatedAt(LocalDateTime.now());
+        RichiestaSoccorso richiestaAggiornata = richiestaSoccorsoRepository.save(richiesta);
+        return richiestaSoccorsoMapper.toResponse(richiestaAggiornata);
+    }
+
+    public RichiestaSoccorsoResponse dettagliRichiesta(Long id) {
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
+        return richiestaSoccorsoMapper.toResponse(richiesta);
+    }
 }
