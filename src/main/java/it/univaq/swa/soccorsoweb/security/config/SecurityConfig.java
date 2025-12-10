@@ -33,7 +33,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
@@ -52,8 +52,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swa/open/**",
-                                "/v3/api-docs/**",
-                                "/v3/api-docs.yaml",
+                                "/api-docs/**",
+                                "/api-docs.yaml",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
