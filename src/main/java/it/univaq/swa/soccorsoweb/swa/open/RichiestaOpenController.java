@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/swa/open/richiesta")
+@RequestMapping("/swa/open/richieste")
 public class RichiestaOpenController {
 
     private final RichiestaService richiestaService;
@@ -23,40 +23,37 @@ public class RichiestaOpenController {
     }
 
     /**
-     * API 2: Invia nuova richiesta di soccorso
+     * API 2: Inserisci nuova richiesta di soccorso
      * @param richiestaSoccorsoRequest
-     * @param request
      * @return ResponseEntity<RichiestaSoccorsoResponse>
-     * @throws MessagingException
      */
-    @PostMapping("/nuova-richiesta")
+    //POST /swa/open/richieste
+    @PostMapping
     public ResponseEntity<RichiestaSoccorsoResponse> nuovaRichiesta(
             @Valid @RequestBody RichiestaSoccorsoRequest richiestaSoccorsoRequest,
             HttpServletRequest request) throws MessagingException {
 
         RichiestaSoccorsoResponse response = richiestaService.nuovaRichiesta(richiestaSoccorsoRequest, request);
 
-        // ✅ Location corretto senza "/nuova-richiesta"
         return ResponseEntity
                 .created(URI.create("/swa/open/richiesta/" + response.getId()))
                 .body(response);
     }
+
     /**
      * API 3: Convalida richiesta di soccorso
-     * @param id
-     * @param token
+     * @param token_convalida
      * @return ResponseEntity<Map<String, Object>>
      */
-    @GetMapping("/{id}/convalida/{token}")
+    // GET /swa/open/richieste/convalida?token_convalida=...
+    @GetMapping("/convalida")
     public ResponseEntity<Map<String, Object>> convalidaRichiesta(
-            @PathVariable Long id,
-            @PathVariable String token) {
+            @RequestParam("token_convalida") String token_convalida) {
 
-        richiestaService.convalidaRichiesta(id, token);
+        richiestaService.convalidaRichiesta(token_convalida);
 
         return ResponseEntity.ok(Map.of(
                 "message", "✅ La tua richiesta di soccorso è stata convalidata con successo!",
-                "id", id,
                 "timestamp", java.time.LocalDateTime.now()
         ));
     }

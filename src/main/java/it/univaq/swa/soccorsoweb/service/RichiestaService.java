@@ -2,6 +2,7 @@ package it.univaq.swa.soccorsoweb.service;
 
 import it.univaq.swa.soccorsoweb.mapper.RichiestaSoccorsoMapper;
 import it.univaq.swa.soccorsoweb.model.dto.request.RichiestaSoccorsoRequest;
+import it.univaq.swa.soccorsoweb.model.dto.response.MissioneResponse;
 import it.univaq.swa.soccorsoweb.model.dto.response.RichiestaSoccorsoResponse;
 import it.univaq.swa.soccorsoweb.model.entity.RichiestaSoccorso;
 import it.univaq.swa.soccorsoweb.repository.RichiestaSoccorsoRepository;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -42,7 +44,6 @@ public class RichiestaService {
 
     public RichiestaSoccorsoResponse nuovaRichiesta(RichiestaSoccorsoRequest richiestaSoccorsoRequest,
                                                     HttpServletRequest request) throws MessagingException {
-        log.info("Creazione nuova richiesta di soccorso da: {}", richiestaSoccorsoRequest.getNomeSegnalante());
 
         RichiestaSoccorso richiesta = richiestaSoccorsoMapper.toEntity(richiestaSoccorsoRequest);
         richiesta.setIpOrigine(getClientIp(request));
@@ -57,42 +58,27 @@ public class RichiestaService {
                 "/convalida/" +
                 richiestaSalvata.getTokenConvalida();
 
-        log.info("Link di convalida: {}", linkConvalida);
-
         emailService.inviaEmailConvalida(
                 richiestaSalvata.getEmailSegnalante(),
                 richiestaSalvata.getNomeSegnalante(),
                 linkConvalida
         );
 
-        log.info("Richiesta di soccorso creata con ID: {}", richiestaSalvata.getId());
         return richiestaSoccorsoMapper.toResponse(richiestaSalvata);
     }
 
-    // ✅ Lancia eccezioni invece di ritornare boolean
-    public void convalidaRichiesta(Long id, String token) {
-        log.info("Tentativo di convalida richiesta ID: {} con token: {}", id, token);
 
-        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
+  public void convalidaRichiesta(String token) {
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findByTokenConvalida(token);
 
-        // ✅ Verifica stato
-        if (richiesta.getStato() != RichiestaSoccorso.StatoRichiesta.INVIATA) {
-            throw new IllegalStateException("Richiesta già convalidata o in lavorazione. Stato attuale: " + richiesta.getStato());
+        if(richiesta == null) {
+            throw new EntityNotFoundException("Token di convalida non valido.");
         }
 
-        // ✅ Verifica token
-        if (!richiesta.getTokenConvalida().equals(token)) {
-            throw new IllegalArgumentException("Token di convalida non valido");
-        }
-
-        // ✅ Aggiorna stato
         richiesta.setStato(RichiestaSoccorso.StatoRichiesta.CONVALIDATA);
-        richiesta.setConvalidataAt(LocalDateTime.now());
+        richiesta.setUpdatedAt(LocalDateTime.now());
+        richiestaSoccorsoRepository.save(richiesta);
 
-        richiestaSoccorsoRepository.save(richiesta);  // save() è sufficiente
-
-        log.info("✅ Richiesta ID: {} convalidata con successo", id);
     }
 
     public List<RichiestaSoccorsoResponse> richiesteFiltrate(@NotNull
@@ -139,5 +125,14 @@ public class RichiestaService {
     public RichiestaSoccorsoResponse dettagliRichiesta(Long id) {
         RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
         return richiestaSoccorsoMapper.toResponse(richiesta);
+    }
+
+    public RichiestaSoccorsoResponse annullaRichiesta(Long id) {
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.ANNULLATA);
+        richiesta.setUpdatedAt(LocalDateTime.now());
+        RichiestaSoccorso richiestaAggiornata = richiestaSoccorsoRepository.save(richiesta);
+        return richiestaSoccorsoMapper.toResponse(richiestaAggiornata);
     }
 }

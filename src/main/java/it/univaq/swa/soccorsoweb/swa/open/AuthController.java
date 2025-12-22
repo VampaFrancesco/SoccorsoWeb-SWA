@@ -13,12 +13,10 @@ import it.univaq.swa.soccorsoweb.model.dto.request.UserRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.UserResponse;
 import it.univaq.swa.soccorsoweb.service.AuthService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-@Slf4j
 @RestController
 @RequestMapping("/swa/open/auth")
 public class AuthController {

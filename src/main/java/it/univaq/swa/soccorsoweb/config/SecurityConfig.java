@@ -10,7 +10,7 @@
  *       - /auth/** è .permitAll() → OK, può passare ✅
  */
 
-package it.univaq.swa.soccorsoweb.security.config;
+package it.univaq.swa.soccorsoweb.config;
 
 import it.univaq.swa.soccorsoweb.security.jwt.JWTAuthenticationFilter;
 import it.univaq.swa.soccorsoweb.security.userdetails.CustomUserDetailsService;
@@ -50,24 +50,41 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // ✅ AGGIUNGI QUESTI per i file statici (senza URL completo!)
                         .requestMatchers(
-                                "/swa/open/**",
+                                "/",                    // Root
+                                "/index.html",          // File principale
+                                "/css/**",              // Tutti i CSS
+                                "/js/**",               // Tutti i JS
+                                "/static/**"            // Cartella static (se serve)
+                        ).permitAll()
+
+                        // ✅ Endpoint pubblici del tuo backend
+                        .requestMatchers("/swa/open/**").permitAll()
+
+                        // ✅ Swagger/OpenAPI
+                        .requestMatchers(
                                 "/api-docs/**",
                                 "/api-docs.yaml",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+
+                        // 🔒 Endpoint protetti
                         .requestMatchers("/swa/api/**").authenticated()
+
+                        // 🔒 Tutto il resto richiede autenticazione
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider())  // ✅ Usa il provider
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -86,5 +103,7 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
+
+
 }
 

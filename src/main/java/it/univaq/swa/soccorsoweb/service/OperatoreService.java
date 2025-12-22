@@ -8,7 +8,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.RoleNotFoundException;
 import java.util.List;
 
 @Slf4j
@@ -23,22 +22,8 @@ public class OperatoreService {
         this.userRepository = userRepository;
     }
 
-    public List<UserResponse> operatoreDisponibile() {
-        List<User> operatori = userRepository.findAll()
-//        for(User u : operatori){
-//            if(!u.getDisponibile() || u.getRoles().stream().noneMatch(r -> r.getName().equals("OPERATORE"))){
-//                operatori.remove(u);
-//            }
-//            return userMapper.toResponseList(operatori);
-//        }
-
-                .stream()
-                .filter(user -> user.getRoles()
-                        .stream()
-                        .anyMatch( role -> role.getName().equals("OPERATORE") && user.getDisponibile())).toList();
-
-        log.info("Operatore disponibile: {} ", operatori.toString());
-
+    public List<UserResponse> operatoreDisponibile(boolean disponibili) {
+        List<User> operatori = userRepository.findOperatoriByDisponibile(disponibili);
         return userMapper.toResponseList(operatori);
     }
 
@@ -50,6 +35,5 @@ public class OperatoreService {
             log.info("Gli operatori hanno matchato");
             return null;}
         return userMapper.toResponse(operatore);
-
     }
 }

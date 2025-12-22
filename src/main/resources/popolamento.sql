@@ -65,7 +65,7 @@ CREATE TABLE richiesta_soccorso (
                                     foto_url VARCHAR(255) NULL,
                                     ip_origine VARCHAR(45) NULL,
                                     token_convalida VARCHAR(255) NULL UNIQUE,
-                                    stato ENUM('INVIATA', 'ATTIVA', 'CONVALIDATA', 'IN_CORSO', 'CHIUSA', 'IGNORATA') NOT NULL DEFAULT 'INVIATA',
+                                    stato ENUM('INVIATA', 'ATTIVA', 'CONVALIDATA', 'IN_CORSO', 'CHIUSA', 'IGNORATA','ANNULLATA') NOT NULL DEFAULT 'INVIATA',
                                     convalidata_at TIMESTAMP NULL,
                                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

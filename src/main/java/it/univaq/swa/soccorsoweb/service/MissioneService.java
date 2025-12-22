@@ -134,19 +134,6 @@ public class MissioneService {
         return missioneMapper.toResponse(missioneSalvata);
     }
 
-
-    @Transactional
-    public MissioneResponse annullaMissione(Long id) {
-        Missione missione = missioneRepository.findById(id).orElseThrow();
-        RichiestaSoccorso richiesta = missione.getRichiesta();
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.IGNORATA); // Placeholder per stato annullato
-        missione.setRichiesta(richiesta);
-        missione.setStato(Missione.StatoMissione.ANNULLATA);
-        Missione missioneSalvata = missioneRepository.saveAndFlush(missione);
-        return missioneMapper.toResponse(missioneSalvata);
-
-    }
-
     public MissioneResponse dettagliMissione(Long id) {
         Missione missione = missioneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
         return missioneMapper.toResponse(missione);
