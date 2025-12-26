@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/index.html",          // File principale
                                 "/css/**",              // Tutti i CSS
                                 "/js/**",               // Tutti i JS
-                                "/static/**"            // Cartella static (se serve)
+                                "/static/**",            // Cartella static (se serve)
+                                "http://127.0.0.1:5500/"
                         ).permitAll()
 
                         // ✅ Endpoint pubblici del tuo backend

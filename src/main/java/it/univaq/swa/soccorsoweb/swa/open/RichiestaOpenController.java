@@ -36,7 +36,7 @@ public class RichiestaOpenController {
         RichiestaSoccorsoResponse response = richiestaService.nuovaRichiesta(richiestaSoccorsoRequest, request);
 
         return ResponseEntity
-                .created(URI.create("/swa/open/richiesta/" + response.getId()))
+                .created(URI.create("/swa/open/richieste/" + response.getId()))
                 .body(response);
     }
 

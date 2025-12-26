@@ -1,5 +1,6 @@
 package it.univaq.swa.soccorsoweb.swa.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import it.univaq.swa.soccorsoweb.model.dto.request.MissioneRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.MissioneResponse;
 import it.univaq.swa.soccorsoweb.service.MissioneService;
@@ -75,12 +76,16 @@ public class MissioneController {
 
 
 // ---------------------------------------------------------------------- API SUPPORTO ----------------------------------------------------------------------
+
+
     /** API di supporto: modifica stato missione
      * Metodo per la modifica dello stato di una missione
      * @param id ID della missione
      * @param nuovoStato Nuovo stato (IN_CORSO, CHIUSA, FALLITA)
      * @return ResponseEntity<MissioneResponse>
      */
+    @Operation
+
     @PutMapping("/modifica-stato/{id}/{nuovoStato}")
     @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
     public ResponseEntity<MissioneResponse> modificaStatoMissione(

@@ -53,10 +53,7 @@ public class RichiestaService {
         RichiestaSoccorso richiestaSalvata = richiestaSoccorsoRepository.save(richiesta);
 
         // ✅ Link corretto con ID e token
-        String linkConvalida = baseUrl + "/swa/open/richiesta/" +
-                richiestaSalvata.getId() +
-                "/convalida/" +
-                richiestaSalvata.getTokenConvalida();
+        String linkConvalida = baseUrl + "/swa/open/richieste/convalida?token_convalida=" + richiestaSalvata.getTokenConvalida();
 
         emailService.inviaEmailConvalida(
                 richiestaSalvata.getEmailSegnalante(),

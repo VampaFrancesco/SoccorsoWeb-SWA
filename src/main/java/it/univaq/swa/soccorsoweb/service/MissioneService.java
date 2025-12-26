@@ -92,6 +92,8 @@ public class MissioneService {
 
         //creo missione
         Missione missione = missioneMapper.toEntity(missioneRequest);
+        missione.setLatitudine(richiesta.getLatitudine());
+        missione.setLongitudine(richiesta.getLongitudine());
 
         //setto caposquadra e richiesta
         missione.setCaposquadra(caposquadra);
