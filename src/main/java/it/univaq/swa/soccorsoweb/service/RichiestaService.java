@@ -94,8 +94,9 @@ public class RichiestaService {
             // Se stato è "TUTTE", recupera tutte le richieste
             richiesteEntity = richiestaSoccorsoRepository.findAll(pageable);
         } else {
-            // Altrimenti filtra per stato specifico
-            richiesteEntity = richiestaSoccorsoRepository.findByStato(stato, pageable);
+            // Converti stringa in enum e filtra per stato specifico
+            RichiestaSoccorso.StatoRichiesta statoEnum = RichiestaSoccorso.StatoRichiesta.valueOf(stato.toUpperCase());
+            richiesteEntity = richiestaSoccorsoRepository.findByStato(statoEnum, pageable);
         }
 
         // Mappa Page<Entity> -> Page<DTO>

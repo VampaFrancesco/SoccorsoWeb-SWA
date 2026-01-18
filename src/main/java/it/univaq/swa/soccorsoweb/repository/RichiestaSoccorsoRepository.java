@@ -18,7 +18,7 @@ public interface RichiestaSoccorsoRepository extends JpaRepository<RichiestaSocc
      * Spring Data JPA genera automaticamente:
      * SELECT * FROM richiesta_soccorso WHERE stato = :stato LIMIT :size OFFSET :offset
      */
-    Page<RichiestaSoccorso> findByStato(String stato, Pageable pageable);
+    Page<RichiestaSoccorso> findByStato(RichiestaSoccorso.StatoRichiesta stato, Pageable pageable);
 
     RichiestaSoccorso findByTokenConvalida(String tokenConvalida);
 
