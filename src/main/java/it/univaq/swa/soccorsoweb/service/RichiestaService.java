@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -79,13 +81,26 @@ public class RichiestaService {
 
     }
 
-    public List<RichiestaSoccorsoResponse> richiesteFiltrate(@NotNull String stato) {
-        if (stato.equalsIgnoreCase("TUTTE")) {
-            return richiestaSoccorsoMapper.toResponseList(richiestaSoccorsoRepository.findAll());
+    /**
+     * Recupera richieste filtrate per stato con paginazione
+     * @param stato Stato della richiesta (o "TUTTE" per recuperare tutte le richieste)
+     * @param pageable Oggetto paginazione (page, size)
+     * @return Page<RichiestaSoccorsoResponse> Pagina di richieste
+     */
+    public Page<RichiestaSoccorsoResponse> richiesteFiltrate(String stato, Pageable pageable) {
+        Page<RichiestaSoccorso> richiesteEntity;
+
+        if ("TUTTE".equalsIgnoreCase(stato)) {
+            // Se stato è "TUTTE", recupera tutte le richieste
+            richiesteEntity = richiestaSoccorsoRepository.findAll(pageable);
+        } else {
+            // Altrimenti filtra per stato specifico
+            richiesteEntity = richiestaSoccorsoRepository.findByStato(stato, pageable);
         }
 
-        RichiestaSoccorso.StatoRichiesta statoEnum = RichiestaSoccorso.StatoRichiesta.valueOf(stato.toUpperCase());
-        return richiestaSoccorsoMapper.toResponseList(richiestaSoccorsoRepository.findAllByStato(statoEnum));
+        // Mappa Page<Entity> -> Page<DTO>
+        // Il metodo map() di Page preserva i metadati di paginazione
+        return richiesteEntity.map(richiestaSoccorsoMapper::toResponse);
     }
 
     private String getClientIp(HttpServletRequest request) {

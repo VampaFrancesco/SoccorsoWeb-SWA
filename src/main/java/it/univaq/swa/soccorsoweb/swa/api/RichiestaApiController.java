@@ -7,6 +7,9 @@ import it.univaq.swa.soccorsoweb.service.RichiestaService;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,18 +29,37 @@ public class RichiestaApiController {
     }
 
     /**
-     * API 4: Visualizza richieste filtrate per stato
-     * @param stato
-     * @return ResponseEntity<List<RichiestaSoccorsoResponse>>
+     * API 4: Visualizza richieste filtrate per stato (PAGINATA)
+     * @param stato Stato della richiesta (INVIATA, CONVALIDATA, ecc.)
+     * @param page Numero pagina (0-based, default: 0)
+     * @param size Elementi per pagina (default: 20, max: 100)
+     * @return ResponseEntity<Page<RichiestaSoccorsoResponse>>
      */
-    // GET /swa/api/richieste?stato=...
+// GET /swa/api/richieste?stato=CONVALIDATA&page=0&size=20
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
-    public ResponseEntity<List<RichiestaSoccorsoResponse>> richiesteFiltrate(@RequestParam("stato") String stato) {
-        List<RichiestaSoccorsoResponse> response = richiestaService.richiesteFiltrate(stato);
-        if(!(response == null)) {
+    public ResponseEntity<Page<RichiestaSoccorsoResponse>> richiesteFiltrate(
+            @RequestParam("stato") String stato,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+        // Validazione size (opzionale ma buona pratica)
+        if (size > 100) {
+            size = 100; // Limita a max 100 elementi per evitare sovraccarico
+        }
+
+        // Crea oggetto Pageable
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Chiama service con paginazione
+        Page<RichiestaSoccorsoResponse> response = richiestaService.richiesteFiltrate(stato, pageable);
+
+        // Verifica se la pagina ha contenuto
+        if (response.hasContent()) {
             return ResponseEntity.ok().body(response);
         }
+
+        // Restituisce 204 No Content se la pagina è vuota
         return ResponseEntity.noContent().build();
     }
 
