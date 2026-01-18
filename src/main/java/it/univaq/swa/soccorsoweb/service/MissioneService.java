@@ -15,7 +15,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,22 +34,26 @@ public class MissioneService {
     private final RichiestaService richiestaService;
     private final UserRepository userRepository;
 
-    public List<MissioneResponse> missioniValutateNegative() {
-        return missioneMapper.toResponseList(missioneRepository.findAllByLivelloSuccessoAndStato()); //livello hardcoded a 5 e stato hardocoded a CHIUSA
-    }
-
     @Transactional
-    public MissioneResponse modificaMissione(Long id, String stato) {
+    public MissioneResponse modificaMissione(Long id, String nuovoStato) {
         //Cerca la missione
         Missione missione = missioneRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
-        Missione.StatoMissione nuovoStato;
-        nuovoStato = Missione.StatoMissione.valueOf(stato.toUpperCase());
-        missione.setStato(nuovoStato);
+
+        //Valida e converte lo stato
+        Missione.StatoMissione statoMissione;
+        try {
+            statoMissione = Missione.StatoMissione.valueOf(nuovoStato.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Stato missione non valido: " + nuovoStato +
+                ". Valori ammessi: IN_CORSO, CHIUSA, FALLITA");
+        }
+
+        missione.setStato(statoMissione);
         missione.setUpdatedAt(LocalDateTime.now());
 
         //Se la missione viene chiusa o fallita, imposta anche la data di fine
-        if (nuovoStato == Missione.StatoMissione.CHIUSA || nuovoStato == Missione.StatoMissione.FALLITA) {
+        if (statoMissione == Missione.StatoMissione.CHIUSA || statoMissione == Missione.StatoMissione.FALLITA) {
             missione.setFineAt(LocalDateTime.now());
 
             // Libera gli operatori assegnati alla missione
@@ -66,7 +69,7 @@ public class MissioneService {
             RichiestaSoccorso richiesta = missione.getRichiesta();
             if (richiesta != null) {
                 RichiestaSoccorso.StatoRichiesta statoRichiesta =
-                        nuovoStato == Missione.StatoMissione.CHIUSA
+                        statoMissione == Missione.StatoMissione.CHIUSA
                                 ? RichiestaSoccorso.StatoRichiesta.CHIUSA
                                 : RichiestaSoccorso.StatoRichiesta.IGNORATA;
                 richiesta.setStato(statoRichiesta);
@@ -169,12 +172,6 @@ public class MissioneService {
         return missioneMapper.toResponse(missioneSalvata);
     }
 
-    public MissioneResponse valutaMissione(Long id, Integer livelloSuccesso) {
-        Missione missione = missioneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
-        missione.setLivelloSuccesso(livelloSuccesso);
-        Missione missioneSalvata = missioneRepository.save(missione);
-        return missioneMapper.toResponse(missioneSalvata);
-    }
 
     public MissioneResponse dettagliMissione(Long id) {
         Missione missione = missioneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
@@ -248,9 +245,6 @@ public class MissioneService {
             }
         }
 
-        if (updateRequest.getLivelloSuccesso() != null) {
-            missione.setLivelloSuccesso(updateRequest.getLivelloSuccesso());
-        }
 
         if (updateRequest.getCommentiFinali() != null) {
             missione.setCommentiFinali(updateRequest.getCommentiFinali());

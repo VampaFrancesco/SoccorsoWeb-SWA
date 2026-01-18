@@ -23,17 +23,24 @@ public class OperatoreService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Restituisce la lista degli operatori disponibili o non disponibili.
+     * Un operatore è considerato "disponibile" se:
+     * 1. Ha il campo disponibile = true
+     * 2. Non è attualmente assegnato a nessuna missione con stato IN_CORSO
+     *
+     * Gli operatori con ruolo ADMIN sono esclusi dalla lista.
+     */
     public List<UserResponse> operatoreDisponibile(boolean disponibili) {
         List<User> operatori = userRepository.findOperatoriByDisponibile(disponibili);
 
+        // Filtra per escludere gli ADMIN (mantiene solo OPERATORE puro)
         List<User> operatoriFiltrati = operatori.stream()
                 .filter(operatore -> {
                     List<Role> ruoli = operatore.getRoles().stream().toList();
-                    boolean hasOperatore = ruoli.stream().anyMatch(role -> role.getName().equals("OPERATORE"));
                     boolean hasAdmin = ruoli.stream().anyMatch(role -> role.getName().equals("ADMIN"));
-
-                    // Mantieni solo chi ha OPERATORE ma NON ADMIN
-                    return hasOperatore && !hasAdmin;
+                    // Esclude chi ha anche ruolo ADMIN
+                    return !hasAdmin;
                 })
                 .toList();
 

@@ -55,8 +55,6 @@ public class Missione {
     @Column(name = "fine_at")
     private LocalDateTime fineAt;
 
-    @Column(name = "livello_successo")
-    private Integer livelloSuccesso;
 
     @Column(name = "commenti_finali", columnDefinition = "TEXT")
     private String commentiFinali;

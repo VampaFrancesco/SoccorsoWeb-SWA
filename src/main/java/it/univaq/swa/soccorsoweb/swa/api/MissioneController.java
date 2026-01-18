@@ -22,17 +22,6 @@ public class MissioneController {
 
     private final MissioneService missioneService;
 
-    /**
-     * API 5: Visualizza missioni chiuse non positive < 5
-     * @return ResponseEntity<List<MissioneResponse>>
-     */
-    // GET /swa/api/missioni
-    @GetMapping("/non-positive")
-    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
-    public ResponseEntity<List<MissioneResponse>> missioniValutateNegative() {
-        return ResponseEntity.ok().body(missioneService.missioniValutateNegative());
-    }
-
 
     /** API 7: Inserimento di una nuova missione
      * Metodo per l'inserimento di una nuova missione a cui viene legata una richiesta di soccorso
@@ -100,20 +89,18 @@ public class MissioneController {
      * @param nuovoStato Nuovo stato (IN_CORSO, CHIUSA, FALLITA)
      * @return ResponseEntity<MissioneResponse>
      */
-    @Operation
-
-    @PutMapping("/modifica-stato/{id}/{nuovoStato}")
+    @PatchMapping("/{id}/modifica-stato")
     @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
     public ResponseEntity<MissioneResponse> modificaStatoMissione(
             @PathVariable Long id,
-            @PathVariable String nuovoStato) {
-            MissioneResponse response = missioneService.modificaMissione(id, nuovoStato);
+            @RequestParam("nuovo_stato") String nuovoStato) {
+        MissioneResponse response = missioneService.modificaMissione(id, nuovoStato);
 
-            if (response != null) {
-                return ResponseEntity.ok().body(response);
-            }
-            return ResponseEntity.noContent().build();
+        if (response != null) {
+            return ResponseEntity.ok().body(response);
         }
+        return ResponseEntity.noContent().build();
+    }
 
     /**
      * API di supporto: elimina missione
@@ -128,20 +115,6 @@ public class MissioneController {
         return ResponseEntity.noContent().build();
     }
 
-    /** API di supporto: valuta missione
-     * Metodo per valutare una missione al termine della stessa
-     * @param id ID della missione
-     * @param valutazione Livello di successo (1-10)
-     * @return ResponseEntity<MissioneResponse>
-     */
-    // PATCH /swa/api/missioni/{id}/valutazione
-    @PatchMapping("/{id}/valutazione")
-    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
-    public ResponseEntity<MissioneResponse> valutaMissione(
-            @PathVariable Long id,
-            @RequestParam("valutazione") Integer valutazione) {
-        return ResponseEntity.ok().body(missioneService.valutaMissione(id, valutazione));
-    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")

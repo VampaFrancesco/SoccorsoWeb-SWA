@@ -27,6 +27,7 @@ public class RichiestaSoccorsoResponse {
     private String fotoUrl;
     private String stato;
     private LocalDateTime convalidataAt;
+    private Integer livelloSuccesso;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Long missioneId;

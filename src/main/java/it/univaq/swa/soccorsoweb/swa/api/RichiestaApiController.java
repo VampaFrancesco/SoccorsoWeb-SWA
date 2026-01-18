@@ -81,7 +81,16 @@ public class RichiestaApiController {
         return ResponseEntity.ok().body(richiestaService.aggiornaRichiesta(id, updateRequest));
     }
 
-
+    /**
+     * API 5: Visualizza richieste chiuse valutate negativamente < 5
+     * @return ResponseEntity<List<RichiestaSoccorsoResponse>>
+     */
+    // GET /swa/api/richieste/non-positive
+    @GetMapping("/non-positive")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
+    public ResponseEntity<List<RichiestaSoccorsoResponse>> richiesteValutateNegative() {
+        return ResponseEntity.ok().body(richiestaService.richiesteValutateNegative());
+    }
 
     // ------------------------------------------ API SUPPORTO ------------------------------------------
 
@@ -111,5 +120,20 @@ public class RichiestaApiController {
             return ResponseEntity.ok().body(response);
         }
         return ResponseEntity.noContent().build();
+    }
+
+    /** API di supporto: valuta richiesta
+     * Metodo per valutare una richiesta al termine della missione
+     * @param id ID della richiesta
+     * @param valutazione Livello di successo (1-10)
+     * @return ResponseEntity<RichiestaSoccorsoResponse>
+     */
+    // PATCH /swa/api/richieste/{id}/valutazione
+    @PatchMapping("/{id}/valutazione")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
+    public ResponseEntity<RichiestaSoccorsoResponse> valutaRichiesta(
+            @PathVariable Long id,
+            @RequestParam("valutazione") Integer valutazione) {
+        return ResponseEntity.ok().body(richiestaService.valutaRichiesta(id, valutazione));
     }
 }

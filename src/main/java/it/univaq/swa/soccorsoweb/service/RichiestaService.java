@@ -168,9 +168,25 @@ public class RichiestaService {
                 RichiestaSoccorso.StatoRichiesta.valueOf(updateRequest.getStato().toUpperCase());
             richiesta.setStato(statoEnum);
         }
+        if (updateRequest.getLivelloSuccesso() != null) {
+            richiesta.setLivelloSuccesso(updateRequest.getLivelloSuccesso());
+        }
 
         richiesta.setUpdatedAt(LocalDateTime.now());
         RichiestaSoccorso richiestaAggiornata = richiestaSoccorsoRepository.save(richiesta);
         return richiestaSoccorsoMapper.toResponse(richiestaAggiornata);
     }
+
+    public RichiestaSoccorsoResponse valutaRichiesta(Long id, Integer livelloSuccesso) {
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
+        richiesta.setLivelloSuccesso(livelloSuccesso);
+        RichiestaSoccorso richiestaSalvata = richiestaSoccorsoRepository.save(richiesta);
+        return richiestaSoccorsoMapper.toResponse(richiestaSalvata);
+    }
+
+    public List<RichiestaSoccorsoResponse> richiesteValutateNegative() {
+        return richiestaSoccorsoMapper.toResponseList(richiestaSoccorsoRepository.findAllByLivelloSuccessoAndStato());
+    }
 }
+

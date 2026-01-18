@@ -26,7 +26,6 @@ public interface MissioneMapper {
     @Mapping(target = "stato", constant = "IN_CORSO")
     @Mapping(target = "inizioAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "fineAt", ignore = true)
-    @Mapping(target = "livelloSuccesso", ignore = true)
     @Mapping(target = "commentiFinali", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

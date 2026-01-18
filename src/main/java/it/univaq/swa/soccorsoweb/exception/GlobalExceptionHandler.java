@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
         });
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
-                "Dati di input non validi"
+                errors.toString()
         );
         problemDetail.setTitle("Validation Error");
         return problemDetail;

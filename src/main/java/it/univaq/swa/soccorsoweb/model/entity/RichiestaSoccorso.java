@@ -61,6 +61,8 @@ public class RichiestaSoccorso {
     @Column(name = "convalidata_at")
     private LocalDateTime convalidataAt;
 
+    @Column(name = "livello_successo")
+    private Integer livelloSuccesso;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

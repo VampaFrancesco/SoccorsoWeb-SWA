@@ -27,6 +27,7 @@ import it.univaq.swa.soccorsoweb.mapper.UserMapper;
 import it.univaq.swa.soccorsoweb.model.dto.request.LoginRequest;
 import it.univaq.swa.soccorsoweb.model.dto.request.UserRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.UserResponse;
+import it.univaq.swa.soccorsoweb.model.entity.Role;
 import it.univaq.swa.soccorsoweb.model.entity.User;
 import it.univaq.swa.soccorsoweb.repository.UserRepository;
 import it.univaq.swa.soccorsoweb.security.jwt.JWTUtil;
@@ -40,6 +41,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
 
 @Slf4j
 @Service
@@ -107,6 +110,9 @@ public class AuthService {
         }
         User user = userMapper.toEntity(userRequest);
         user.setPassword(BCrypt.hashpw(userRequest.getPassword(), BCrypt.gensalt()));
+        user.setRoles(new HashSet<>() {{
+            add(new Role(1L, "OPERATORE"));
+        }});
         return userMapper.toResponse(userRepository.save(user));
     }
 }

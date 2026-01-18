@@ -1,0 +1,353 @@
+openapi: 3.0.1
+info:
+  title: SoccorsoWeb API - API di Supporto
+  version: v1.0
+  description: >
+    Endpoint aggiuntivi di supporto (non richiesti dalla specifica base),
+    separati dalle 14 API core.
+
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+
+paths:
+  /swa/open/richieste/conferma-convalida:
+    post:
+      tags: [api-di-supporto]
+      summary: Convalida la convalida della mail
+      description: Conferma la convalida di una richiesta di soccorso tramite token.
+      operationId: confermaConvalida
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvalidaRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: object }
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security: []
+
+  /swa/open/auth/sign-up:
+    post:
+      tags: [api-di-supporto]
+      summary: Registra un utente
+      description: Permette la registrazione di un nuovo utente.
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security: []
+
+  /swa/api/missioni:
+    get:
+      tags: [api-di-supporto]
+      summary: Filtro TUTTE le missioni
+      description: Esegue una find all sul db per restituire tutte le missioni (filtro TUTTE).
+      operationId: tutteLeMissioni
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MissioneResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+  /swa/api/missioni/{id}/modifica-stato:
+    patch:
+      tags: [api-di-supporto]
+      summary: Modifica lo stato di una missione
+      description: Prende come parametro un ID di una missione e modifica lo stato.
+      operationId: modificaStatoMissione
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: nuovoStato
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioneResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+  /swa/api/missioni/{id}:
+    delete:
+      tags: [api-di-supporto]
+      summary: Elimina una missione
+      description: Dato un id, elimina la missione collegata.
+      operationId: eliminaMissione
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { description: OK }
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+    patch:
+      tags: [api-di-supporto]
+      summary: Modifica parzialmente o tutta la missione selezionata
+      description: Aggiorna una missione esistente.
+      operationId: aggiornaMissione
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissioneUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioneResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+  /swa/api/richieste/{id}:
+    patch:
+      tags: [api-di-supporto]
+      summary: Modifica parzialmente o tutta la richiesta selezionata
+      description: Aggiorna i dati di una richiesta di soccorso.
+      operationId: aggiornaRichiesta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RichiestaSoccorsoUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+  /swa/api/richieste/{id}/stato:
+    patch:
+      tags: [api-di-supporto]
+      summary: Modifica stato richiesta
+      description: Modifica lo stato di una richiesta passato come query param.
+      operationId: modificaStatoRichiesta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: stato
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+  /swa/api/richieste/{id}/valutazione:
+    patch:
+      tags: [api-di-supporto]
+      summary: Valuta richiesta
+      description: Assegna una valutazione alla richiesta con id nel path.
+      operationId: valutaRichiesta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: valutazione
+          in: query
+          required: true
+          schema: { type: integer, format: int32 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '422': { description: Unprocessable Entity }
+        '500': { description: Internal Server Error }
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    ConvalidaRequest:
+      type: object
+      required: [tokenconvalida]
+      properties:
+        tokenconvalida:
+          type: string
+
+    UserRequest:
+      type: object
+      required: [email, password, nome, cognome]
+      properties:
+        email: { type: string }
+        password: { type: string }
+        nome: { type: string }
+        cognome: { type: string }
+
+    UserResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        email: { type: string }
+        nome: { type: string }
+        cognome: { type: string }
+
+    RichiestaSoccorsoUpdateRequest:
+      type: object
+      properties:
+        descrizione: { type: string }
+        indirizzo: { type: string }
+        latitudine: { type: number }
+        longitudine: { type: number }
+        nomesegnalante: { type: string }
+        emailsegnalante: { type: string }
+        fotourl: { type: string }
+        telefonosegnalante: { type: string }
+        stato: { type: string }
+        livellosuccesso:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 10
+
+    MissioneUpdateRequest:
+      type: object
+      properties:
+        obiettivo: { type: string }
+        caposquadraid: { type: integer, format: int64 }
+        posizione: { type: string }
+        latitudine: { type: number }
+        longitudine: { type: number }
+        stato: { type: string }
+        commentifinali: { type: string }
+        operatoriids:
+          type: array
+          items: { type: integer, format: int64 }
+
+    RichiestaSoccorsoResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        descrizione: { type: string }
+        stato: { type: string }
+
+    MissioneResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        obiettivo: { type: string }
+        stato: { type: string }
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+tags:
+  - name: api-di-supporto
+    description: API DI SUPPORTO - Operazioni aggiuntive non richieste dalla specifica base del progetto

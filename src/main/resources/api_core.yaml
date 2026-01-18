@@ -1,0 +1,347 @@
+openapi: 3.0.1
+info:
+  title: SoccorsoWeb API - Core Endpoints
+  version: v1.0
+  description: |
+    API RESTful per il sistema di gestione richieste di soccorso SoccorsoWeb.
+    14 Endpoint obbligatori (13 operazioni + 2 auth = 14 totali).
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+
+paths:
+  /swa/open/auth/login:
+    post:
+      tags:
+        - auth-controller
+      summary: Login utente
+      description: Autentica un utente nel sistema e restituisce un token JWT
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+        '500': { description: Internal Server Error }
+
+  /swa/open/auth/logout:
+    post:
+      tags:
+        - auth-controller
+      summary: Logout utente
+      description: Termina la sessione corrente dell'utente autenticato
+      operationId: logout
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: string }
+        '400': { description: Bad Request }
+        '401': { description: Unauthorized }
+
+  /swa/open/richieste:
+    post:
+      tags:
+        - richiesta-open-controller
+      summary: Crea una nuova richiesta di soccorso
+      description: Inserimento richiesta + email convalida
+      operationId: nuovaRichiesta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RichiestaSoccorsoRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+
+  /swa/open/richieste/convalida:
+    get:
+      tags:
+        - richiesta-open-controller
+      summary: Convalida richiesta tramite token
+      parameters:
+        - name: tokenconvalida
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /swa/api/richieste:
+    get:
+      tags:
+        - richiesta-api-controller
+      summary: Lista richieste filtrate per stato
+      parameters:
+        - name: stato
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+
+  /swa/api/richieste/{id}:
+    get:
+      tags:
+        - richiesta-api-controller
+      summary: Dettagli richiesta di soccorso
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+
+  /swa/api/richieste/{id}/annullamento:
+    patch:
+      tags:
+        - richiesta-api-controller
+      summary: Annulla richiesta (solo ADMIN)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+
+  /swa/api/richieste/non-positive:
+    get:
+      tags:
+        - richiesta-api-controller
+      summary: Richieste con valutazione negativa (<5/10)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RichiestaSoccorsoResponse'
+
+  /swa/api/missioni:
+    post:
+      tags:
+        - missione-controller
+      summary: Crea nuova missione
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissioneRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioneResponse'
+
+  /swa/api/missioni/{id}:
+    get:
+      tags:
+        - missione-controller
+      summary: Dettagli missione
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioneResponse'
+
+  /swa/api/missioni/{id}/chiusura:
+    patch:
+      tags:
+        - missione-controller
+      summary: Chiude missione in corso
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissioneResponse'
+
+  /swa/api/operatori:
+    get:
+      tags:
+        - operatore-controller
+      summary: Lista operatori disponibili
+      parameters:
+        - name: disponibile
+          in: query
+          required: false
+          schema: 
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+  /swa/api/operatori/{id}:
+    get:
+      tags:
+        - operatore-controller
+      summary: Dettagli operatore
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /swa/api/operatori/{id}/missioni:
+    get:
+      tags:
+        - operatore-controller
+      summary: Storico missioni operatore
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MissioneResponse'
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+    
+    UserResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        email: { type: string }
+        nome: { type: string }
+        cognome: { type: string }
+        token: { type: string }
+    
+    RichiestaSoccorsoRequest:
+      type: object
+      required: [descrizione, indirizzo, nomesegnalante, emailsegnalante]
+      properties:
+        descrizione: { type: string }
+        indirizzo: { type: string }
+        latitudine: { type: number }
+        longitudine: { type: number }
+        nomesegnalante: { type: string }
+        emailsegnalante: { type: string }
+    
+    RichiestaSoccorsoResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        descrizione: { type: string }
+        stato: { type: string }
+        latitudine: { type: number }
+        longitudine: { type: number }
+    
+    MissioneRequest:
+      type: object
+      required: [richiestaid, obiettivo, caposquadraid]
+      properties:
+        richiestaid: { type: integer, format: int64 }
+        obiettivo: { type: string }
+        caposquadraid: { type: integer, format: int64 }
+    
+    MissioneResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        obiettivo: { type: string }
+        stato: { type: string }
+        caposquadra:
+          $ref: '#/components/schemas/UserResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Token JWT da /swa/open/auth/login'
+
+tags:
+  - name: auth-controller
+    description: Autenticazione - Login/Logout
+  - name: richiesta-open-controller
+    description: Richieste di Soccorso - Operazioni pubbliche
+  - name: richiesta-api-controller
+    description: Richieste di Soccorso - Operazioni protette
+  - name: missione-controller
+    description: Missioni - Operazioni protette
+  - name: operatore-controller
+    description: Operatori - Operazioni protette

@@ -43,5 +43,8 @@ public class RichiestaSoccorsoUpdateRequest {
     private String telefonoSegnalante;
 
     private String stato; // INVIATA, CONVALIDATA, IN_CORSO, CHIUSA, ANNULLATA, IGNORATA
-}
 
+    @Min(value = 1, message = "Il livello di successo deve essere compreso tra 1 e 10")
+    @Max(value = 10, message = "Il livello di successo deve essere compreso tra 1 e 10")
+    private Integer livelloSuccesso;
+}

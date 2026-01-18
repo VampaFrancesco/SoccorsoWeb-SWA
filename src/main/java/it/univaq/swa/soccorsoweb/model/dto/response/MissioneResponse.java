@@ -26,7 +26,6 @@ public class MissioneResponse {
     private UserResponse caposquadra;
     private LocalDateTime inizioAt;
     private LocalDateTime fineAt;
-    private Integer livelloSuccesso;
     private String commentiFinali;
     private String stato;
     private LocalDateTime createdAt;

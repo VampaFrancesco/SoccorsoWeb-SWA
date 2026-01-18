@@ -12,7 +12,4 @@ public interface MissioneRepository extends JpaRepository<Missione, Long> {
 
     @Query("SELECT mo.missione FROM MissioneOperatore mo WHERE mo.operatore.id = :id")
     List<Missione> findAllByOperatoreId(Long id);
-
-    @Query("SELECT m FROM Missione m WHERE m.livelloSuccesso IS NOT NULL AND m.livelloSuccesso < 5 AND m.stato = 'CHIUSA'")
-    List<Missione> findAllByLivelloSuccessoAndStato();
 }

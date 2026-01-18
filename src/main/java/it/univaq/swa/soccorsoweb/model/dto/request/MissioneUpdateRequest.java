@@ -35,9 +35,6 @@ public class MissioneUpdateRequest {
 
     private String stato; // IN_CORSO, CHIUSA, FALLITA
 
-    @Min(value = 1, message = "Il livello di successo deve essere compreso tra 1 e 10")
-    @Max(value = 10, message = "Il livello di successo deve essere compreso tra 1 e 10")
-    private Integer livelloSuccesso;
 
     private String commentiFinali;
 

@@ -17,6 +17,7 @@ public interface RichiestaSoccorsoMapper {
     @Mapping(target = "ipOrigine", ignore = true)
     @Mapping(target = "fotoUrl", ignore = true)
     @Mapping(target = "convalidataAt", ignore = true)
+    @Mapping(target = "livelloSuccesso", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "missione", ignore = true)
