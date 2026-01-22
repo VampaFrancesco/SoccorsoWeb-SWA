@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j  // ✅ Per logging
+@Slf4j // ✅ Per logging
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    @Transactional(readOnly = true)  // ✅ IMPORTANTE: garantisce accesso a user.getRoles()
+    @Transactional(readOnly = true) // ✅ IMPORTANTE: garantisce accesso a user.getRoles()
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("Loading user by email: {}", email);
 
@@ -42,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 2. Converti i ruoli dell'entity in GrantedAuthority di Spring Security
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getNome()))
                 .collect(Collectors.toList());
 
         log.info("User {} caricato con ruoli: {}", email, authorities);
@@ -51,9 +51,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .builder()
                 .username(user.getEmail())
-                .password(user.getPassword())  // ✅ Già hashata nel DB
-                .authorities(authorities)      // ✅ ROLE_ADMIN, ROLE_OPERATORE
-                .disabled(!user.getAttivo())   // ✅ Se attivo=false → disabled=true
+                .password(user.getPassword()) // ✅ Già hashata nel DB
+                .authorities(authorities) // ✅ ROLE_ADMIN, ROLE_OPERATORE
+                .disabled(!user.getAttivo()) // ✅ Se attivo=false → disabled=true
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)

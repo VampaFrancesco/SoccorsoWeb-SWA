@@ -11,11 +11,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "user", indexes = {
+@Table(name = "utenti", indexes = {
         @Index(name = "idx_email", columnList = "email"),
         @Index(name = "idx_attivo", columnList = "attivo")
 })
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -45,11 +46,9 @@ public class User {
 
     private String indirizzo;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean attivo = true;
-
-    @Column(nullable = false)
-    private Boolean disponibile = true;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -60,22 +59,15 @@ public class User {
     private LocalDateTime updatedAt;
 
     // Relazioni Many-to-Many con Role (semplice, senza campi aggiuntivi)
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "utenti_ruoli", joinColumns = @JoinColumn(name = "utente_id"), inverseJoinColumns = @JoinColumn(name = "ruolo_id"))
     private Set<Role> roles = new HashSet<>();
 
-
     // Relazione One-to-Many con MissioneOperatore (entity di relazione)
+    @Builder.Default
     @OneToMany(mappedBy = "operatore", cascade = CascadeType.ALL)
     private Set<MissioneOperatore> missioniComeOperatore = new HashSet<>();
-
-    // Missioni come caposquadra (One-to-Many)
-    @OneToMany(mappedBy = "caposquadra")
-    private Set<Missione> missioniComeCaposquadra = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

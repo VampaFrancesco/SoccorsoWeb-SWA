@@ -38,7 +38,7 @@ public class OperatoreService {
         List<User> operatoriFiltrati = operatori.stream()
                 .filter(operatore -> {
                     List<Role> ruoli = operatore.getRoles().stream().toList();
-                    boolean hasAdmin = ruoli.stream().anyMatch(role -> role.getName().equals("ADMIN"));
+                    boolean hasAdmin = ruoli.stream().anyMatch(role -> role.getNome().equals("ADMIN"));
                     // Esclude chi ha anche ruolo ADMIN
                     return !hasAdmin;
                 })
@@ -47,13 +47,12 @@ public class OperatoreService {
         return userMapper.toResponseList(operatoriFiltrati);
     }
 
-
-    public UserResponse dettagliOperatore(Long id){
+    public UserResponse dettagliOperatore(Long id) {
 
         User operatore = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Operatore non trovato con ID: " + id));
         boolean isOperatore = operatore.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("OPERATORE"));
+                .anyMatch(role -> role.getNome().equals("OPERATORE"));
         if (!isOperatore) {
             throw new IllegalArgumentException("L'utente con ID " + id + " non è un operatore");
         }

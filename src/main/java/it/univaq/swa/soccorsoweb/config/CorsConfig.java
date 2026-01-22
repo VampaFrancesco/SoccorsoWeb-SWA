@@ -14,16 +14,19 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
-                registry.addMapping("/**")  // Tutti gli endpoint
+                registry.addMapping("/**") // Tutti gli endpoint
                         .allowedOrigins(
                                 "http://127.0.0.1:5500",
                                 "http://localhost:5500",
-                                "https://editor.swagger.io"
-                        )
+                                "https://editor.swagger.io",
+                                "http://localhost:8080",
+                                "http://localhost:3000",
+                                "http://localhost:4200",
+                                "http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true)
-                        .exposedHeaders("Authorization");  // ← QUESTO per JWT
+                        .exposedHeaders("Authorization"); // ← QUESTO per JWT
             }
         };
     }

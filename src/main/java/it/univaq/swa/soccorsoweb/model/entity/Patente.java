@@ -4,20 +4,23 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "ruoli", indexes = {
-        @Index(name = "idx_ruolo_nome", columnList = "nome")
+@Table(name = "patenti", indexes = {
+        @Index(name = "idx_tipo", columnList = "tipo")
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role {
+public class Patente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String nome;
+    private String tipo;
+
+    @Column(columnDefinition = "TEXT")
+    private String descrizione;
 }

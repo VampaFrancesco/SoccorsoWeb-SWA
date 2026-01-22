@@ -10,10 +10,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(
-        componentModel = "spring",
-        uses = {UserMapper.class, MissioneOperatoreMapper.class}
-)
+@Mapper(componentModel = "spring", uses = { UserMapper.class, MissioneOperatoreMapper.class,
+        RichiestaSoccorsoMapper.class })
 public interface MissioneMapper {
 
     // ========== Request → Entity ==========
@@ -23,6 +21,10 @@ public interface MissioneMapper {
     @Mapping(target = "richiesta", ignore = true)
     @Mapping(target = "caposquadra", ignore = true)
     @Mapping(target = "missioneOperatori", ignore = true)
+    @Mapping(target = "missioniMezzi", ignore = true)
+    @Mapping(target = "missioniMateriali", ignore = true)
+    @Mapping(target = "squadra", ignore = true)
+    @Mapping(target = "livelloSuccesso", ignore = true)
     @Mapping(target = "stato", constant = "IN_CORSO")
     @Mapping(target = "inizioAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "fineAt", ignore = true)
@@ -34,6 +36,7 @@ public interface MissioneMapper {
     // ========== Entity → Response ==========
     @Mapping(target = "richiestaId", source = "richiesta.id")
     @Mapping(target = "richiesta", source = "richiesta")
+    @Mapping(target = "caposquadra", source = "caposquadra.utente")
     @Mapping(target = "numeroOperatori", expression = "java(entity.getMissioneOperatori() != null ? entity.getMissioneOperatori().size() : 0)")
     @Mapping(target = "operatori", expression = "java(mapMissioneOperatoriToUsers(entity))")
     MissioneResponse toResponse(Missione entity);
@@ -61,7 +64,7 @@ public interface MissioneMapper {
                     response.setTelefono(mo.getOperatore().getTelefono());
                     response.setIndirizzo(mo.getOperatore().getIndirizzo());
                     response.setAttivo(mo.getOperatore().getAttivo());
-                    response.setDisponibile(mo.getOperatore().getDisponibile());
+                    // response.setDisponibile(mo.getOperatore().getDisponibile()); // Removed
                     response.setCreatedAt(mo.getOperatore().getCreatedAt());
                     response.setUpdatedAt(mo.getOperatore().getUpdatedAt());
                     // Non mappiamo i roles per evitare il problema con roleMapper
@@ -71,4 +74,3 @@ public interface MissioneMapper {
                 .collect(Collectors.toSet());
     }
 }
-

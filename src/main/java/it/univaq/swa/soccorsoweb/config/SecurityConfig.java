@@ -41,7 +41,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
     public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter,
-                          CustomUserDetailsService customUserDetailsService) {
+            CustomUserDetailsService customUserDetailsService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.customUserDetailsService = customUserDetailsService;
     }
@@ -54,12 +54,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // ✅ AGGIUNGI QUESTI per i file statici (senza URL completo!)
                         .requestMatchers(
-                                "/",                    // Root
-                                "/index.html",          // File principale
-                                "/css/**",              // Tutti i CSS
-                                "/js/**",               // Tutti i JS
-                                "/static/**",            // Cartella static (se serve)
-                                "http://127.0.0.1:5500/"
+                                "/", // Root
+                                "/index.html", // File principale
+                                "/css/**", // Tutti i CSS
+                                "/js/**", // Tutti i JS
+                                "/static/**" // Cartella static (se serve)
                         ).permitAll()
 
                         // ✅ Endpoint pubblici del tuo backend
@@ -70,29 +69,26 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/api-docs.yaml",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                                "/swagger-ui.html")
+                        .permitAll()
 
                         // 🔒 Endpoint protetti
                         .requestMatchers("/swa/api/**").authenticated()
 
                         // 🔒 Tutto il resto richiede autenticazione
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(customUserDetailsService);  // ✅ CHIAVE
+        provider.setUserDetailsService(customUserDetailsService); // ✅ CHIAVE
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -107,6 +103,4 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
-
 }
-

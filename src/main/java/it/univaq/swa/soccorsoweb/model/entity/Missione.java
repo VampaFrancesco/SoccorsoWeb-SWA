@@ -14,11 +14,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "missione", indexes = {
+@Table(name = "missioni", indexes = {
         @Index(name = "idx_stato", columnList = "stato"),
-        @Index(name = "idx_caposquadra", columnList = "caposquadra_id")
+        @Index(name = "idx_caposquadra", columnList = "caposquadra_id"),
+        @Index(name = "idx_squadra", columnList = "squadra_id"),
+        @Index(name = "idx_richiesta", columnList = "richiesta_id")
 })
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,10 +31,17 @@ public class Missione {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relazione One-to-One con RichiestaSoccorso
     @OneToOne
     @JoinColumn(name = "richiesta_id", nullable = false, unique = true)
     private RichiestaSoccorso richiesta;
+
+    @ManyToOne
+    @JoinColumn(name = "squadra_id")
+    private Squadra squadra;
+
+    @ManyToOne
+    @JoinColumn(name = "caposquadra_id", nullable = false)
+    private Caposquadra caposquadra;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String obiettivo;
@@ -44,24 +54,23 @@ public class Missione {
     @Column(precision = 11, scale = 8)
     private BigDecimal longitudine;
 
-    // Relazione Many-to-One con User (caposquadra)
-    @ManyToOne
-    @JoinColumn(name = "caposquadra_id", nullable = false)
-    private User caposquadra;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatoMissione stato = StatoMissione.IN_CORSO;
 
+    @Builder.Default
     @Column(name = "inizio_at")
     private LocalDateTime inizioAt = LocalDateTime.now();
 
     @Column(name = "fine_at")
     private LocalDateTime fineAt;
 
+    @Column(name = "livello_successo")
+    private Integer livelloSuccesso;
 
     @Column(name = "commenti_finali", columnDefinition = "TEXT")
     private String commentiFinali;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StatoMissione stato = StatoMissione.IN_CORSO;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -71,14 +80,20 @@ public class Missione {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relazione One-to-Many con MissioneOperatore (entity di relazione)
+    @Builder.Default
     @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MissioneOperatore> missioneOperatori = new HashSet<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MissioneMezzo> missioniMezzi = new HashSet<>();
 
-    // Enum per lo stato
+    @Builder.Default
+    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<MissioneMateriale> missioniMateriali = new HashSet<>();
+
     public enum StatoMissione {
-        IN_CORSO, CHIUSA, FALLITA, ANNULLATA
+        IN_CORSO, CHIUSA, FALLITA
     }
 
     @PrePersist

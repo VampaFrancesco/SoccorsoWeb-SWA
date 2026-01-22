@@ -7,31 +7,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class MissioneResponse {
+public class SquadraResponse {
     private Long id;
-    private Long richiestaId;
-    private String obiettivo;
-    private String posizione;
-    private BigDecimal latitudine;
-    private BigDecimal longitudine;
+    private String nome;
+    private String descrizione;
     private UserResponse caposquadra;
-    private LocalDateTime inizioAt;
-    private LocalDateTime fineAt;
-    private String commentiFinali;
-    private Integer livelloSuccesso;
-    private String stato;
+    private Boolean attiva;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Set<UserResponse> operatori;
-    private Integer numeroOperatori;
-    private RichiestaSoccorsoResponse richiesta;
 }

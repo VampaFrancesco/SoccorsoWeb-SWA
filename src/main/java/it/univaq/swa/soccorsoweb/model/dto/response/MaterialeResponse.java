@@ -7,21 +7,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class AuthResponseDto {
-
-    private String token;
-    @Builder.Default
-    private String type = "Bearer";
-    private UserResponse user;
-
-    public AuthResponseDto(String token, UserResponse user) {
-        this.token = token;
-        this.user = user;
-        this.type = "Bearer";
-    }
+public class MaterialeResponse {
+    private Long id;
+    private String nome;
+    private String descrizione;
+    private String tipo;
+    private Integer quantita;
+    private Boolean disponibile;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

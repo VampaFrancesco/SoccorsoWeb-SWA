@@ -160,8 +160,4 @@ public class GlobalExceptionHandler {
         problemDetail.setTitle("Autenticazione Fallita");
         return problemDetail;
     }
-
-
-
-
 }

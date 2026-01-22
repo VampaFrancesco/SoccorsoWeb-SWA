@@ -15,9 +15,7 @@ public interface RichiestaSoccorsoMapper {
     @Mapping(target = "tokenConvalida", ignore = true)
     @Mapping(target = "stato", constant = "INVIATA")
     @Mapping(target = "ipOrigine", ignore = true)
-    @Mapping(target = "fotoUrl", ignore = true)
     @Mapping(target = "convalidataAt", ignore = true)
-    @Mapping(target = "livelloSuccesso", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "missione", ignore = true)
@@ -25,6 +23,7 @@ public interface RichiestaSoccorsoMapper {
 
     // ========== Entity → Response ==========
     @Mapping(target = "missioneId", source = "missione.id")
+    @Mapping(target = "livelloSuccesso", source = "missione.livelloSuccesso")
     RichiestaSoccorsoResponse toResponse(RichiestaSoccorso entity);
 
     // ========== List mapping ==========

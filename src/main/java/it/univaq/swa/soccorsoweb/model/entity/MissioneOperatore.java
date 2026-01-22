@@ -6,8 +6,9 @@ import lombok.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "missione_operatori")
-@Getter @Setter
+@Table(name = "missioni_operatori")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,10 +27,16 @@ public class MissioneOperatore {
     @JoinColumn(name = "operatore_id")
     private User operatore;
 
+    @Column(name = "notificato_at")
+    private java.time.LocalDateTime notificatoAt;
+
+    @Column(name = "assegnato_at")
+    private java.time.LocalDateTime assegnatoAt;
 
     // Classe per la chiave composta
     @Embeddable
-    @Getter @Setter
+    @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @EqualsAndHashCode
@@ -41,4 +48,3 @@ public class MissioneOperatore {
         private Long operatoreId;
     }
 }
-

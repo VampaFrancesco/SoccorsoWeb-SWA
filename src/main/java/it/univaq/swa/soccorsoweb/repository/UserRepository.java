@@ -20,11 +20,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * 2. Se disponibile=true, esclude operatori impegnati in missioni IN_CORSO
      */
     @Query("SELECT DISTINCT u FROM User u " +
-           "LEFT JOIN u.roles r " +
-           "LEFT JOIN MissioneOperatore mo ON mo.operatore.id = u.id " +
-           "LEFT JOIN mo.missione m " +
-           "WHERE r.name = 'OPERATORE' " +
-           "AND u.disponibile = :disponibile " +
-           "AND (:disponibile = false OR m.id IS NULL OR m.stato != 'IN_CORSO')")
+            "JOIN u.roles r " +
+            "WHERE r.nome = 'OPERATORE' " +
+            "AND u.attivo = true " +
+            "AND (" +
+            "   (:disponibile = true AND u.id NOT IN (SELECT mo.operatore.id FROM MissioneOperatore mo WHERE mo.missione.stato = 'IN_CORSO')) "
+            +
+            "   OR " +
+            "   (:disponibile = false AND u.id IN (SELECT mo.operatore.id FROM MissioneOperatore mo WHERE mo.missione.stato = 'IN_CORSO'))"
+            +
+            ")")
     List<User> findOperatoriByDisponibile(@Param("disponibile") boolean disponibile);
 }

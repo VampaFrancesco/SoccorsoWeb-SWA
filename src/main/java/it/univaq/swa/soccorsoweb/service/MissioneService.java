@@ -4,10 +4,12 @@ import it.univaq.swa.soccorsoweb.mapper.MissioneMapper;
 import it.univaq.swa.soccorsoweb.model.dto.request.MissioneRequest;
 import it.univaq.swa.soccorsoweb.model.dto.request.MissioneUpdateRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.MissioneResponse;
+import it.univaq.swa.soccorsoweb.model.entity.Caposquadra;
 import it.univaq.swa.soccorsoweb.model.entity.Missione;
 import it.univaq.swa.soccorsoweb.model.entity.MissioneOperatore;
 import it.univaq.swa.soccorsoweb.model.entity.RichiestaSoccorso;
 import it.univaq.swa.soccorsoweb.model.entity.User;
+import it.univaq.swa.soccorsoweb.repository.CaposquadraRepository;
 import it.univaq.swa.soccorsoweb.repository.MissioneRepository;
 import it.univaq.swa.soccorsoweb.repository.RichiestaSoccorsoRepository;
 import it.univaq.swa.soccorsoweb.repository.UserRepository;
@@ -33,49 +35,39 @@ public class MissioneService {
     private final RichiestaSoccorsoRepository richiestaSoccorsoRepository;
     private final RichiestaService richiestaService;
     private final UserRepository userRepository;
+    private final CaposquadraRepository caposquadraRepository;
 
     @Transactional
     public MissioneResponse modificaMissione(Long id, String nuovoStato) {
-        //Cerca la missione
+        // Cerca la missione
         Missione missione = missioneRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
 
-        //Valida e converte lo stato
+        // Valida e converte lo stato
         Missione.StatoMissione statoMissione;
         try {
             statoMissione = Missione.StatoMissione.valueOf(nuovoStato.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Stato missione non valido: " + nuovoStato +
-                ". Valori ammessi: IN_CORSO, CHIUSA, FALLITA");
+                    ". Valori ammessi: IN_CORSO, CHIUSA, FALLITA");
         }
 
         missione.setStato(statoMissione);
         missione.setUpdatedAt(LocalDateTime.now());
 
-        //Se la missione viene chiusa o fallita, imposta anche la data di fine
+        // Se la missione viene chiusa o fallita, imposta anche la data di fine
         if (statoMissione == Missione.StatoMissione.CHIUSA || statoMissione == Missione.StatoMissione.FALLITA) {
             missione.setFineAt(LocalDateTime.now());
 
-            // Libera gli operatori assegnati alla missione
-            if (missione.getMissioneOperatori() != null && !missione.getMissioneOperatori().isEmpty()) {
-                for (MissioneOperatore missioneOperatore : missione.getMissioneOperatori()) {
-                    User operatore = missioneOperatore.getOperatore();
-                    operatore.setDisponibile(true);
-                    userRepository.save(operatore);
-                }
-            }
-
-            //Aggiorna anche lo stato della richiesta
+            // Aggiorna anche lo stato della richiesta
             RichiestaSoccorso richiesta = missione.getRichiesta();
             if (richiesta != null) {
-                RichiestaSoccorso.StatoRichiesta statoRichiesta =
-                        statoMissione == Missione.StatoMissione.CHIUSA
-                                ? RichiestaSoccorso.StatoRichiesta.CHIUSA
-                                : RichiestaSoccorso.StatoRichiesta.IGNORATA;
+                RichiestaSoccorso.StatoRichiesta statoRichiesta = statoMissione == Missione.StatoMissione.CHIUSA
+                        ? RichiestaSoccorso.StatoRichiesta.CHIUSA
+                        : RichiestaSoccorso.StatoRichiesta.IGNORATA;
                 richiesta.setStato(statoRichiesta);
             }
         }
-
 
         Missione missioneSalvata = missioneRepository.save(missione);
         return missioneMapper.toResponse(missioneSalvata);
@@ -86,19 +78,10 @@ public class MissioneService {
         Missione missione = missioneRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
 
-        // Libera gli operatori assegnati alla missione
-        if (missione.getMissioneOperatori() != null && !missione.getMissioneOperatori().isEmpty()) {
-            for (MissioneOperatore missioneOperatore : missione.getMissioneOperatori()) {
-                User operatore = missioneOperatore.getOperatore();
-                operatore.setDisponibile(true);
-                userRepository.save(operatore);
-            }
-        }
-
         // Ripristina lo stato della richiesta
         RichiestaSoccorso richiesta = missione.getRichiesta();
         if (richiesta != null) {
-            richiesta.setStato(RichiestaSoccorso.StatoRichiesta.CONVALIDATA);
+            richiesta.setStato(RichiestaSoccorso.StatoRichiesta.ATTIVA); // Ripristina ad ATTIVA (ex Convalidata)
         }
 
         missioneRepository.deleteById(id);
@@ -107,34 +90,34 @@ public class MissioneService {
     @Transactional
     public MissioneResponse inserisciMissione(@Valid MissioneRequest missioneRequest) {
 
-        //ottengo caposquadra
-        User caposquadra = userRepository.findById(missioneRequest.getCaposquadraId()).orElseThrow();
+        // ottengo caposquadra
+        Caposquadra caposquadra = caposquadraRepository.findByUtenteId(missioneRequest.getCaposquadraId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Caposquadra non trovato per utente ID: " + missioneRequest.getCaposquadraId()));
 
-        //ottengo richiesta
-        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(missioneRequest.getRichiestaId()).orElseThrow();
+        // ottengo richiesta
+        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(missioneRequest.getRichiestaId())
+                .orElseThrow();
 
-        //creo missione
+        // creo missione
         Missione missione = missioneMapper.toEntity(missioneRequest);
         missione.setLatitudine(richiesta.getLatitudine());
         missione.setLongitudine(richiesta.getLongitudine());
 
-        //setto caposquadra e richiesta
+        // setto caposquadra e richiesta
         missione.setCaposquadra(caposquadra);
         missione.setRichiesta(richiesta);
 
-        //gestisco operatori
+        // gestisco operatori
         if (missioneRequest.getOperatoriIds() != null && !missioneRequest.getOperatoriIds().isEmpty()) {
             Set<MissioneOperatore> missioneOperatori = new HashSet<>();
             List<User> operatori = userRepository.findAllById(missioneRequest.getOperatoriIds());
 
             for (User operatore : operatori) {
-                // Marca l'operatore come NON disponibile
-                operatore.setDisponibile(false);
-                userRepository.save(operatore);
-
                 MissioneOperatore missioneOperatore = new MissioneOperatore();
                 missioneOperatore.setOperatore(operatore);
                 missioneOperatore.setMissione(missione);
+                missioneOperatore.setAssegnatoAt(LocalDateTime.now()); // Setta timestamp
                 MissioneOperatore.MissioneOperatoreId id = new MissioneOperatore.MissioneOperatoreId();
                 id.setMissioneId(missione.getId());
                 id.setOperatoreId(operatore.getId());
@@ -159,22 +142,13 @@ public class MissioneService {
         richiestaService.modificaRichiesta(missione.getRichiesta().getId(), "CHIUSA");
         missione.setFineAt(LocalDateTime.now());
 
-        // Libera gli operatori assegnati alla missione
-        if (missione.getMissioneOperatori() != null && !missione.getMissioneOperatori().isEmpty()) {
-            for (MissioneOperatore missioneOperatore : missione.getMissioneOperatori()) {
-                User operatore = missioneOperatore.getOperatore();
-                operatore.setDisponibile(true);
-                userRepository.save(operatore);
-            }
-        }
-
         Missione missioneSalvata = missioneRepository.save(missione);
         return missioneMapper.toResponse(missioneSalvata);
     }
 
-
     public MissioneResponse dettagliMissione(Long id) {
-        Missione missione = missioneRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
+        Missione missione = missioneRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Missione non trovata con ID: " + id));
         return missioneMapper.toResponse(missione);
     }
 
@@ -182,6 +156,9 @@ public class MissioneService {
         List<Missione> missioni = missioneRepository.findAllByOperatoreId(id);
         return missioneMapper.toResponseList(missioni);
     }
+
+    // TODO: Implementare findAllByOperatoreId in Repository se manca, o usare query
+    // su MissioneOperatore
 
     public List<MissioneResponse> tutteLeMissioni() {
         List<Missione> missioni = missioneRepository.findAll();
@@ -199,8 +176,9 @@ public class MissioneService {
         }
 
         if (updateRequest.getCaposquadraId() != null) {
-            User caposquadra = userRepository.findById(updateRequest.getCaposquadraId())
-                    .orElseThrow(() -> new EntityNotFoundException("Caposquadra non trovato con ID: " + updateRequest.getCaposquadraId()));
+            Caposquadra caposquadra = caposquadraRepository.findByUtenteId(updateRequest.getCaposquadraId())
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "Caposquadra non trovato per utente ID: " + updateRequest.getCaposquadraId()));
             missione.setCaposquadra(caposquadra);
         }
 
@@ -224,27 +202,16 @@ public class MissioneService {
             if (nuovoStato == Missione.StatoMissione.CHIUSA || nuovoStato == Missione.StatoMissione.FALLITA) {
                 missione.setFineAt(LocalDateTime.now());
 
-                // Libera gli operatori assegnati alla missione
-                if (missione.getMissioneOperatori() != null && !missione.getMissioneOperatori().isEmpty()) {
-                    for (MissioneOperatore missioneOperatore : missione.getMissioneOperatori()) {
-                        User operatore = missioneOperatore.getOperatore();
-                        operatore.setDisponibile(true);
-                        userRepository.save(operatore);
-                    }
-                }
-
                 // Aggiorna anche lo stato della richiesta
                 RichiestaSoccorso richiesta = missione.getRichiesta();
                 if (richiesta != null) {
-                    RichiestaSoccorso.StatoRichiesta statoRichiesta =
-                            nuovoStato == Missione.StatoMissione.CHIUSA
-                                    ? RichiestaSoccorso.StatoRichiesta.CHIUSA
-                                    : RichiestaSoccorso.StatoRichiesta.IGNORATA;
+                    RichiestaSoccorso.StatoRichiesta statoRichiesta = nuovoStato == Missione.StatoMissione.CHIUSA
+                            ? RichiestaSoccorso.StatoRichiesta.CHIUSA
+                            : RichiestaSoccorso.StatoRichiesta.IGNORATA;
                     richiesta.setStato(statoRichiesta);
                 }
             }
         }
-
 
         if (updateRequest.getCommentiFinali() != null) {
             missione.setCommentiFinali(updateRequest.getCommentiFinali());
@@ -252,30 +219,18 @@ public class MissioneService {
 
         // Gestisce operatori se forniti
         if (updateRequest.getOperatoriIds() != null) {
-            // Prima libera i vecchi operatori (solo se la missione non è già chiusa)
-            if (missione.getStato() != Missione.StatoMissione.CHIUSA &&
-                missione.getStato() != Missione.StatoMissione.FALLITA) {
-                if (missione.getMissioneOperatori() != null && !missione.getMissioneOperatori().isEmpty()) {
-                    for (MissioneOperatore missioneOperatore : missione.getMissioneOperatori()) {
-                        User operatore = missioneOperatore.getOperatore();
-                        operatore.setDisponibile(true);
-                        userRepository.save(operatore);
-                    }
-                }
-            }
+            // Poi assegna i nuovi operatori (sovrascrive o aggiunge? logica originale era
+            // complessa, qui semplifico: sostituzione completa se inviati)
 
-            // Poi assegna i nuovi operatori
             Set<MissioneOperatore> missioneOperatori = new HashSet<>();
             if (!updateRequest.getOperatoriIds().isEmpty()) {
                 List<User> operatori = userRepository.findAllById(updateRequest.getOperatoriIds());
                 for (User operatore : operatori) {
-                    // Marca il nuovo operatore come NON disponibile
-                    operatore.setDisponibile(false);
-                    userRepository.save(operatore);
 
                     MissioneOperatore missioneOperatore = new MissioneOperatore();
                     missioneOperatore.setOperatore(operatore);
                     missioneOperatore.setMissione(missione);
+                    missioneOperatore.setAssegnatoAt(LocalDateTime.now());
                     MissioneOperatore.MissioneOperatoreId moid = new MissioneOperatore.MissioneOperatoreId();
                     moid.setMissioneId(missione.getId());
                     moid.setOperatoreId(operatore.getId());
@@ -283,7 +238,8 @@ public class MissioneService {
                     missioneOperatori.add(missioneOperatore);
                 }
             }
-            missione.setMissioneOperatori(missioneOperatori);
+            missione.getMissioneOperatori().clear();
+            missione.getMissioneOperatori().addAll(missioneOperatori);
         }
 
         missione.setUpdatedAt(LocalDateTime.now());

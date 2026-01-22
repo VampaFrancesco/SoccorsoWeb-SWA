@@ -9,12 +9,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "richiesta_soccorso", indexes = {
+@Table(name = "richieste_soccorso", indexes = {
         @Index(name = "idx_email_segnalante", columnList = "email_segnalante"),
         @Index(name = "idx_stato", columnList = "stato"),
         @Index(name = "idx_token", columnList = "token_convalida")
 })
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -54,6 +55,7 @@ public class RichiestaSoccorso {
     @Column(name = "token_convalida", unique = true)
     private String tokenConvalida;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatoRichiesta stato = StatoRichiesta.INVIATA;
@@ -78,7 +80,7 @@ public class RichiestaSoccorso {
 
     // Enum per lo stato
     public enum StatoRichiesta {
-        INVIATA, ATTIVA, IN_CORSO, CHIUSA, IGNORATA, CONVALIDATA, ANNULLATA, TUTTE
+        INVIATA, ATTIVA, IN_CORSO, CHIUSA, IGNORATA
     }
 
     @PrePersist
