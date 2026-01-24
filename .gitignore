@@ -1,6 +1,5 @@
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -35,14 +34,11 @@ build/
 ### Other Stuff ###
 .DS_Store
 docker-compose.yml
-mvnw
-mvnw.cmd
-.mvn/
+
 
 
 HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
