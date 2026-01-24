@@ -19,11 +19,11 @@ public interface RichiestaSoccorsoMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "missione", ignore = true)
+    @Mapping(target = "livelloSuccesso", ignore = true)
     RichiestaSoccorso toEntity(RichiestaSoccorsoRequest request);
 
     // ========== Entity → Response ==========
     @Mapping(target = "missioneId", source = "missione.id")
-    @Mapping(target = "livelloSuccesso", source = "missione.livelloSuccesso")
     RichiestaSoccorsoResponse toResponse(RichiestaSoccorso entity);
 
     // ========== List mapping ==========
