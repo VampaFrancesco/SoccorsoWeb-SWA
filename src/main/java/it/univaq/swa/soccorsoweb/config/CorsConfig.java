@@ -26,6 +26,7 @@ public class CorsConfig {
                                 "http://localhost:3000",
                                 "http://localhost:4200",
                                 "http://localhost:5173",
+                                "https://soccorsoweb-swa-production.up.railway.app",
                                 frontendUrl)
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
