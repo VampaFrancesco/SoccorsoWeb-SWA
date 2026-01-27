@@ -1,36 +1,25 @@
 package it.univaq.swa.soccorsoweb.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.resend.*;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${resend.api.key}")
+    private String resendApiKey;
 
-    @Value("${spring.mail.username:noreply@soccorsoweb.it}")
+    @Value("${resend.from.email:noreply@soccorsoweb.it}")
     private String fromEmail;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
-
-    public void inviaEmailConvalida(String toEmail, String nomeSegnalante, String linkConvalida) throws MessagingException {
-
-            log.info("📧 Invio email di convalida a: {}", toEmail);
-
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("⚠️ Conferma la tua richiesta di soccorso");
+    public void inviaEmailConvalida(String toEmail, String nomeSegnalante, String linkConvalida) {
+        try {
+            Resend resend = new Resend(resendApiKey);
 
             String htmlContent = """
                 <!DOCTYPE html>
@@ -55,34 +44,43 @@ public class EmailService {
                         <div class="content">
                             <h2>Ciao %s,</h2>
                             <p>Abbiamo ricevuto la tua <strong>richiesta di soccorso</strong>.</p>
-                            <p>Per attivarla e permettere ai nostri operatori di gestirla, devi <strong>confermare</strong> cliccando sul pulsante qui sotto:</p>
-                           \s
+                            <p>Per attivarla, clicca sul pulsante qui sotto:</p>
+                            
                             <div style="text-align: center;">
                                 <a href="%s" class="button">✅ CONFERMA RICHIESTA</a>
                             </div>
-                           \s
-                            <p><strong>Oppure</strong> copia e incolla questo link nel browser:</p>
+                            
+                            <p><strong>Oppure</strong> copia questo link:</p>
                             <div class="link-box">%s</div>
-                           \s
+                            
                             <p style="margin-top: 30px; color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 5px;">
                                 ⚠️ <strong>Importante:</strong> Se non hai effettuato questa richiesta, ignora questa email.
                             </p>
                         </div>
                         <div class="footer">
                             <p>Questa è un'email automatica, non rispondere.</p>
-                            <p>&copy; 2025 SoccorsoWeb - Sistema di gestione emergenze</p>
+                            <p>&copy; 2026 SoccorsoWeb</p>
                         </div>
                     </div>
                 </body>
                 </html>
-               \s""".formatted(nomeSegnalante, linkConvalida, linkConvalida);
+                """.formatted(nomeSegnalante, linkConvalida, linkConvalida);
 
-            helper.setText(htmlContent, true);
+            CreateEmailOptions params = CreateEmailOptions.builder()
+                    .from(fromEmail)
+                    .to(toEmail)
+                    .subject("⚠️ Conferma la tua richiesta di soccorso")
+                    .html(htmlContent)
+                    .build();
 
-            mailSender.send(message);
-            log.info("✅ Email inviata con successo a: {}", toEmail);
+            CreateEmailResponse response = resend.emails().send(params);
+
+            log.info("✅ Email Resend inviata a: {} (ID: {})", toEmail, response.getId());
+
+        } catch (ResendException e) {
+            log.error("❌ Resend error: {} - {}", e.getCause(), e.getMessage());
+        } catch (Exception e) {
+            log.error("❌ Errore invio email Resend: {}", e.getMessage(), e);
+        }
     }
-
-
 }
-
