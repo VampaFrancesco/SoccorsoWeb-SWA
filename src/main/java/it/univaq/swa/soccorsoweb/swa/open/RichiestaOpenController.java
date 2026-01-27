@@ -1,6 +1,5 @@
 package it.univaq.swa.soccorsoweb.swa.open;
 
-import it.univaq.swa.soccorsoweb.model.dto.request.ConvalidaRequest;
 import it.univaq.swa.soccorsoweb.model.dto.request.RichiestaSoccorsoRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.RichiestaSoccorsoResponse;
 import it.univaq.swa.soccorsoweb.service.RichiestaService;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.net.URI;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/swa/open/richieste")
@@ -21,8 +19,8 @@ public class RichiestaOpenController {
 
     private final RichiestaService richiestaService;
 
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
+    @Value("${app.web-service-url}")
+    private String webServiceUrl;
 
     public RichiestaOpenController(RichiestaService richiestaService) {
         this.richiestaService = richiestaService;
@@ -30,10 +28,11 @@ public class RichiestaOpenController {
 
     /**
      * API 2: Inserisci nuova richiesta di soccorso
+     * 
      * @param richiestaSoccorsoRequest
      * @return ResponseEntity<RichiestaSoccorsoResponse>
      */
-    //POST /swa/open/richieste
+    // POST /swa/open/richieste
     @PostMapping
     public ResponseEntity<RichiestaSoccorsoResponse> nuovaRichiesta(
             @Valid @RequestBody RichiestaSoccorsoRequest richiestaSoccorsoRequest,
@@ -47,36 +46,33 @@ public class RichiestaOpenController {
     }
 
     /**
-     * API 3: Redirect alla pagina di convalida del frontend
+     * API 3: Convalida richiesta e redirect al servizio FreeMarker
+     * Questo endpoint viene chiamato direttamente dal link nell'email.
+     * Convalida immediatamente la richiesta e fa redirect al servizio FreeMarker
+     * che mostrerà la pagina di conferma.
+     * 
      * @param token_convalida Token di convalida ricevuto via email
-     * @return RedirectView verso il frontend
+     * @return RedirectView verso il servizio FreeMarker con parametro di
+     *         successo/errore
      */
     // GET /swa/open/richieste/convalida?token_convalida=...
     @GetMapping("/convalida")
     public RedirectView redirectConvalida(
             @RequestParam("token_convalida") String token_convalida) {
 
-        // Redirect al frontend con il token
-        String redirectUrl = frontendUrl + "/convalida.html?token_convalida=" + token_convalida;
-        return new RedirectView(redirectUrl);
-    }
+        try {
+            // 1. Convalida immediatamente la richiesta
+            richiestaService.convalidaRichiesta(token_convalida);
 
-    /**
-     * API: Conferma convalida richiesta di soccorso
-     * Chiamato dal frontend dopo che l'utente ha confermato
-     * @param request ConvalidaRequest con token di convalida
-     * @return ResponseEntity<Map<String, Object>>
-     */
-    // POST /swa/open/richieste/conferma-convalida
-    @PostMapping("/conferma-convalida")
-    public ResponseEntity<Map<String, Object>> confermaConvalida(
-            @Valid @RequestBody ConvalidaRequest request) {
+            // 2. Redirect al servizio FreeMarker con successo
+            String redirectUrl = webServiceUrl + "/convalida?status=success";
+            return new RedirectView(redirectUrl);
 
-        richiestaService.convalidaRichiesta(request.getTokenConvalida());
-
-        return ResponseEntity.ok(Map.of(
-                "message", "✅ La tua richiesta di soccorso è stata convalidata con successo!",
-                "timestamp", java.time.LocalDateTime.now()
-        ));
+        } catch (Exception e) {
+            // 3. In caso di errore, redirect con parametro di errore
+            String redirectUrl = webServiceUrl + "/convalida?status=error&message="
+                    + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+            return new RedirectView(redirectUrl);
+        }
     }
 }
