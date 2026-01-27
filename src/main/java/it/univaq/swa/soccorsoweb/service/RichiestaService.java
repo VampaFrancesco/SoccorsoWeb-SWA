@@ -8,7 +8,6 @@ import it.univaq.swa.soccorsoweb.model.entity.Missione;
 import it.univaq.swa.soccorsoweb.model.entity.RichiestaSoccorso;
 import it.univaq.swa.soccorsoweb.repository.MissioneRepository;
 import it.univaq.swa.soccorsoweb.repository.RichiestaSoccorsoRepository;
-import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -36,33 +35,52 @@ public class RichiestaService {
     private String baseUrl;
 
     public RichiestaService(RichiestaSoccorsoMapper richiestaSoccorsoMapper,
-            RichiestaSoccorsoRepository richiestaSoccorsoRepository,
-            MissioneRepository missioneRepository, // Add this
-            EmailService emailService) {
+                            RichiestaSoccorsoRepository richiestaSoccorsoRepository,
+                            MissioneRepository missioneRepository,
+                            EmailService emailService) {
         this.richiestaSoccorsoMapper = richiestaSoccorsoMapper;
         this.richiestaSoccorsoRepository = richiestaSoccorsoRepository;
         this.missioneRepository = missioneRepository;
         this.emailService = emailService;
     }
 
+    // ✅ MODIFICATO: Try-Catch per email
+    @Transactional
     public RichiestaSoccorsoResponse nuovaRichiesta(RichiestaSoccorsoRequest richiestaSoccorsoRequest,
-            HttpServletRequest request) throws MessagingException {
+                                                    HttpServletRequest request) {
 
+        log.info("📝 Inserimento nuova richiesta da: {}", richiestaSoccorsoRequest.getEmailSegnalante());
+
+        // 1. Crea e salva richiesta nel DB
         RichiestaSoccorso richiesta = richiestaSoccorsoMapper.toEntity(richiestaSoccorsoRequest);
         richiesta.setIpOrigine(getClientIp(request));
         richiesta.setTokenConvalida(UUID.randomUUID().toString());
         richiesta.setStato(RichiestaSoccorso.StatoRichiesta.INVIATA);
 
         RichiestaSoccorso richiestaSalvata = richiestaSoccorsoRepository.save(richiesta);
+        log.info("✅ Richiesta salvata con ID: {}", richiestaSalvata.getId());
 
-        String linkConvalida = baseUrl + "/swa/open/richieste/convalida?token_convalida="
-                + richiestaSalvata.getTokenConvalida();
+        // 2. Invia email (con protezione try-catch)
+        try {
+            String linkConvalida = baseUrl + "/swa/open/richieste/convalida?token_convalida="
+                    + richiestaSalvata.getTokenConvalida();
 
-        emailService.inviaEmailConvalida(
-                richiestaSalvata.getEmailSegnalante(),
-                richiestaSalvata.getNomeSegnalante(),
-                linkConvalida);
+            emailService.inviaEmailConvalida(
+                    richiestaSalvata.getEmailSegnalante(),
+                    richiestaSalvata.getNomeSegnalante(),
+                    linkConvalida);
 
+            log.info("✅ Email di convalida inviata a: {}", richiestaSalvata.getEmailSegnalante());
+
+        } catch (Exception e) {
+            // ❌ Email fallita MA richiesta già salvata nel DB!
+            log.error("⚠️ Impossibile inviare email di convalida a {}: {}",
+                    richiestaSalvata.getEmailSegnalante(), e.getMessage());
+            log.error("Stack trace completo: ", e);
+            // NON rilanciare eccezione! L'operazione continua con successo.
+        }
+
+        // 3. Restituisci risposta (SEMPRE successo, anche se email fallisce)
         return richiestaSoccorsoMapper.toResponse(richiestaSalvata);
     }
 
@@ -73,11 +91,10 @@ public class RichiestaService {
             throw new EntityNotFoundException("Token di convalida non valido.");
         }
 
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.ATTIVA); // Set to ATTIVA as CONVALIDATA is removed
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.ATTIVA);
         richiesta.setConvalidataAt(LocalDateTime.now());
         richiesta.setUpdatedAt(LocalDateTime.now());
         richiestaSoccorsoRepository.save(richiesta);
-
     }
 
     public Page<RichiestaSoccorsoResponse> richiesteFiltrate(String stato, Pageable pageable) {
@@ -133,7 +150,7 @@ public class RichiestaService {
     public RichiestaSoccorsoResponse annullaRichiesta(Long id) {
         RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.IGNORATA); // Use IGNORATA as ANNULLATA is removed
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.IGNORATA);
         richiesta.setUpdatedAt(LocalDateTime.now());
         RichiestaSoccorso richiestaAggiornata = richiestaSoccorsoRepository.save(richiesta);
         return richiestaSoccorsoMapper.toResponse(richiestaAggiornata);
@@ -144,7 +161,6 @@ public class RichiestaService {
         RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
 
-        // Aggiorna solo i campi forniti (non null)
         if (updateRequest.getDescrizione() != null) {
             richiesta.setDescrizione(updateRequest.getDescrizione());
         }
@@ -175,7 +191,6 @@ public class RichiestaService {
             richiesta.setStato(statoEnum);
         }
         if (updateRequest.getLivelloSuccesso() != null && richiesta.getMissione() != null) {
-            // Redirect level update to Missione
             Missione missione = richiesta.getMissione();
             missione.setLivelloSuccesso(updateRequest.getLivelloSuccesso());
             missioneRepository.save(missione);
@@ -195,10 +210,6 @@ public class RichiestaService {
             missione.setLivelloSuccesso(livelloSuccesso);
             missioneRepository.save(missione);
         } else {
-            // Handle case where request has no mission (unlikely if strictly followed
-            // process, but possible)
-            // For now throw/log or ignore?
-            // Ideally we shouldn't rate a request without mission.
             throw new IllegalStateException("Impossibile valutare una richiesta senza missione associata");
         }
 
@@ -206,10 +217,6 @@ public class RichiestaService {
     }
 
     public List<RichiestaSoccorsoResponse> richiesteValutateNegative() {
-        // This needs to join with Missione to check level.
-        // Since RichiestaSoccorso has one Missione, we can filter in Java or use custom
-        // query.
-        // Let's assume we want requests where Missione.livelloSuccesso <= 2
         List<Missione> missioniNegative = missioneRepository.findAll().stream()
                 .filter(m -> m.getLivelloSuccesso() != null && m.getLivelloSuccesso() <= 2)
                 .collect(Collectors.toList());
