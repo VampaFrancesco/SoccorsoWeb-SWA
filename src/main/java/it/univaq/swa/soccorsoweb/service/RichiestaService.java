@@ -92,7 +92,7 @@ public class RichiestaService {
             throw new EntityNotFoundException("Token di convalida non valido.");
         }
 
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.ATTIVA);
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.CONVALIDATA);
         richiesta.setConvalidataAt(LocalDateTime.now());
         richiesta.setUpdatedAt(LocalDateTime.now());
         richiestaSoccorsoRepository.save(richiesta);
