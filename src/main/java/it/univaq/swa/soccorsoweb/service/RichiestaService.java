@@ -31,13 +31,13 @@ public class RichiestaService {
     private final MissioneRepository missioneRepository;
     private final EmailService emailService;
 
-    @Value("${app.base-url}")
-    private String baseUrl;
+
+    private final String baseUrl = "http://localhost:8080";
 
     public RichiestaService(RichiestaSoccorsoMapper richiestaSoccorsoMapper,
-                            RichiestaSoccorsoRepository richiestaSoccorsoRepository,
-                            MissioneRepository missioneRepository,
-                            EmailService emailService) {
+            RichiestaSoccorsoRepository richiestaSoccorsoRepository,
+            MissioneRepository missioneRepository,
+            EmailService emailService) {
         this.richiestaSoccorsoMapper = richiestaSoccorsoMapper;
         this.richiestaSoccorsoRepository = richiestaSoccorsoRepository;
         this.missioneRepository = missioneRepository;
@@ -47,7 +47,7 @@ public class RichiestaService {
     // ✅ MODIFICATO: Try-Catch per email
     @Transactional
     public RichiestaSoccorsoResponse nuovaRichiesta(RichiestaSoccorsoRequest richiestaSoccorsoRequest,
-                                                    HttpServletRequest request) {
+            HttpServletRequest request) {
 
         log.info("📝 Inserimento nuova richiesta da: {}", richiestaSoccorsoRequest.getEmailSegnalante());
 
@@ -62,8 +62,9 @@ public class RichiestaService {
 
         // 2. Invia email (con protezione try-catch)
         try {
-            String linkConvalida = baseUrl + "/swa/open/richieste/convalida?token_convalida="
-                    + richiestaSalvata.getTokenConvalida();
+            String linkConvalida = baseUrl+
+                    "/convalida?token_convalida="+
+                    richiestaSalvata.getTokenConvalida();
 
             emailService.inviaEmailConvalida(
                     richiestaSalvata.getEmailSegnalante(),
@@ -84,7 +85,7 @@ public class RichiestaService {
         return richiestaSoccorsoMapper.toResponse(richiestaSalvata);
     }
 
-    public void convalidaRichiesta(String token) {
+    public boolean convalidaRichiesta(String token) throws EntityNotFoundException {
         RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findByTokenConvalida(token);
 
         if (richiesta == null) {
@@ -95,7 +96,9 @@ public class RichiestaService {
         richiesta.setConvalidataAt(LocalDateTime.now());
         richiesta.setUpdatedAt(LocalDateTime.now());
         richiestaSoccorsoRepository.save(richiesta);
+        return true;
     }
+
 
     public Page<RichiestaSoccorsoResponse> richiesteFiltrate(String stato, Pageable pageable) {
         Page<RichiestaSoccorso> richiesteEntity;
