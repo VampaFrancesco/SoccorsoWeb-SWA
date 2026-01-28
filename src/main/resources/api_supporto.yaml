@@ -393,9 +393,9 @@ components:
     # DTO Request - Convalida
     ConvalidaRequest:
       type: object
-      required: [tokenconvalida]
+      required: [token_convalida]
       properties:
-        tokenconvalida:
+        token_convalida:
           type: string
           description: Token univoco ricevuto via email
 
