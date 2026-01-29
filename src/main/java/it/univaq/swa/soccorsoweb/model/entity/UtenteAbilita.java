@@ -6,7 +6,7 @@ import lombok.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "utenti_abilita", indexes = {
+@Table(name = "user_abilita", indexes = {
         @Index(name = "idx_abilita_id", columnList = "abilita_id")
 })
 @Getter
@@ -20,8 +20,8 @@ public class UtenteAbilita {
     private UtenteAbilitaId id;
 
     @ManyToOne
-    @MapsId("utenteId")
-    @JoinColumn(name = "utente_id")
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private User utente;
 
     @ManyToOne
@@ -39,8 +39,8 @@ public class UtenteAbilita {
     @AllArgsConstructor
     @EqualsAndHashCode
     public static class UtenteAbilitaId implements Serializable {
-        @Column(name = "utente_id")
-        private Long utenteId;
+        @Column(name = "user_id")
+        private Long userId;
 
         @Column(name = "abilita_id")
         private Long abilitaId;

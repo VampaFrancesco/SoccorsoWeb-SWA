@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
@@ -22,4 +23,5 @@ public class SquadraResponse {
     private Boolean attiva;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Set<SquadraOperatoreResponse> operatori;
 }

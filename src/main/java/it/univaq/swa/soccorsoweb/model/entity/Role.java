@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "ruoli", indexes = {
-        @Index(name = "idx_ruolo_nome", columnList = "nome")
+@Table(name = "role", indexes = {
+        @Index(name = "idx_role_name", columnList = "name")
 })
 @Getter
 @Setter
@@ -19,5 +19,5 @@ public class Role {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    private String nome;
+    private String name;
 }

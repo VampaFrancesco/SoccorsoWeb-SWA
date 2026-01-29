@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class RichiestaSoccorsoResponse {
+
     private Long id;
     private String descrizione;
     private String indirizzo;
@@ -24,13 +25,17 @@ public class RichiestaSoccorsoResponse {
     private String nomeSegnalante;
     private String emailSegnalante;
     private String telefonoSegnalante;
-    private String fotoUrl;
-    private String stato;
-    private LocalDateTime convalidataAt;
-    private Integer livelloSuccesso;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private Long missioneId;
+
+    // Foto come byte array (Base64 encoded in JSON)
+    private byte[] foto;
+
     private String ipOrigine;
     private String tokenConvalida;
+    private String stato;
+    private LocalDateTime convalidataAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // ID della missione associata (se esiste)
+    private Long missioneId;
 }

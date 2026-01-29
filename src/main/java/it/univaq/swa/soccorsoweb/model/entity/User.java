@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "utenti", indexes = {
+@Table(name = "user", indexes = {
         @Index(name = "idx_email", columnList = "email"),
         @Index(name = "idx_attivo", columnList = "attivo")
 })
@@ -58,24 +58,24 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relazioni Many-to-Many con Role (semplice, senza campi aggiuntivi)
+    // Relazione Many-to-Many con Role tramite tabella user_role
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "utenti_ruoli", joinColumns = @JoinColumn(name = "utente_id"), inverseJoinColumns = @JoinColumn(name = "ruolo_id"))
+    @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    // Relazione One-to-Many con MissioneOperatore (entity di relazione)
+    // Relazione con Patenti
     @Builder.Default
-    @OneToMany(mappedBy = "operatore", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UtentePatente> patenti = new HashSet<>();
+
+    // Relazione con Abilita
+    @Builder.Default
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UtenteAbilita> abilita = new HashSet<>();
+
+    // Relazione con Missioni come operatore
+    @Builder.Default
+    @OneToMany(mappedBy = "operatore", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MissioneOperatore> missioniComeOperatore = new HashSet<>();
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

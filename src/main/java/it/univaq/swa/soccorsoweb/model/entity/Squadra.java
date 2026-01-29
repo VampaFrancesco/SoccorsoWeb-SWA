@@ -6,9 +6,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "squadre", indexes = {
+@Table(name = "squadra", indexes = {
         @Index(name = "idx_caposquadra", columnList = "caposquadra_id"),
         @Index(name = "idx_attiva", columnList = "attiva")
 })
@@ -44,6 +46,11 @@ public class Squadra {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Relazione con gli operatori della squadra
+    @Builder.Default
+    @OneToMany(mappedBy = "squadra", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SquadraOperatore> operatori = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

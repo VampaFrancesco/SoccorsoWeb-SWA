@@ -1,13 +1,26 @@
 package it.univaq.swa.soccorsoweb.mapper;
 
+import it.univaq.swa.soccorsoweb.model.dto.request.RoleRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.RoleResponse;
 import it.univaq.swa.soccorsoweb.model.entity.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+import java.util.Set;
+
 @Mapper(componentModel = "spring")
 public interface RoleMapper {
 
-    @Mapping(target = "name", source = "nome")
+    // ========== Request → Entity ==========
+    @Mapping(target = "id", ignore = true)
+    Role toEntity(RoleRequest request);
+
+    // ========== Entity → Response ==========
     RoleResponse toResponse(Role role);
+
+    // ========== List/Set mapping ==========
+    List<RoleResponse> toResponseList(List<Role> roles);
+
+    Set<RoleResponse> toResponseSet(Set<Role> roles);
 }

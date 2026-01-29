@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "missioni_operatori")
+@Table(name = "missione_operatori", indexes = {
+        @Index(name = "idx_operatore", columnList = "operatore_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,10 +31,10 @@ public class MissioneOperatore {
     private User operatore;
 
     @Column(name = "notificato_at")
-    private java.time.LocalDateTime notificatoAt;
+    private LocalDateTime notificatoAt;
 
     @Column(name = "assegnato_at")
-    private java.time.LocalDateTime assegnatoAt;
+    private LocalDateTime assegnatoAt;
 
     // Classe per la chiave composta
     @Embeddable

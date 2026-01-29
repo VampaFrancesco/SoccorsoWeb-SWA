@@ -42,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 2. Converti i ruoli dell'entity in GrantedAuthority di Spring Security
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getNome()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toList());
 
         log.info("User {} caricato con ruoli: {}", email, authorities);

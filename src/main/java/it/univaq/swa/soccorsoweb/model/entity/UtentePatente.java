@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "utenti_patenti", indexes = {
+@Table(name = "user_patenti", indexes = {
         @Index(name = "idx_patente_id", columnList = "patente_id")
 })
 @Getter
@@ -21,8 +21,8 @@ public class UtentePatente {
     private UtentePatenteId id;
 
     @ManyToOne
-    @MapsId("utenteId")
-    @JoinColumn(name = "utente_id")
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private User utente;
 
     @ManyToOne
@@ -40,8 +40,8 @@ public class UtentePatente {
     @AllArgsConstructor
     @EqualsAndHashCode
     public static class UtentePatenteId implements Serializable {
-        @Column(name = "utente_id")
-        private Long utenteId;
+        @Column(name = "user_id")
+        private Long userId;
 
         @Column(name = "patente_id")
         private Long patenteId;

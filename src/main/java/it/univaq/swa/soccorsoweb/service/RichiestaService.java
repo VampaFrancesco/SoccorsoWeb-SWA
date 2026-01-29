@@ -31,7 +31,6 @@ public class RichiestaService {
     private final MissioneRepository missioneRepository;
     private final EmailService emailService;
 
-
     private final String baseUrl = "http://localhost:8080";
 
     public RichiestaService(RichiestaSoccorsoMapper richiestaSoccorsoMapper,
@@ -44,26 +43,19 @@ public class RichiestaService {
         this.emailService = emailService;
     }
 
-    // ✅ MODIFICATO: Try-Catch per email
     @Transactional
     public RichiestaSoccorsoResponse nuovaRichiesta(RichiestaSoccorsoRequest richiestaSoccorsoRequest,
             HttpServletRequest request) {
-
-        log.info("📝 Inserimento nuova richiesta da: {}", richiestaSoccorsoRequest.getEmailSegnalante());
-
         // 1. Crea e salva richiesta nel DB
         RichiestaSoccorso richiesta = richiestaSoccorsoMapper.toEntity(richiestaSoccorsoRequest);
         richiesta.setIpOrigine(getClientIp(request));
         richiesta.setTokenConvalida(UUID.randomUUID().toString());
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.INVIATA);
 
         RichiestaSoccorso richiestaSalvata = richiestaSoccorsoRepository.save(richiesta);
-        log.info("✅ Richiesta salvata con ID: {}", richiestaSalvata.getId());
 
-        // 2. Invia email (con protezione try-catch)
         try {
-            String linkConvalida = baseUrl+
-                    "/convalida?token_convalida="+
+            String linkConvalida = baseUrl +
+                    "/convalida?token_convalida=" +
                     richiestaSalvata.getTokenConvalida();
 
             emailService.inviaEmailConvalida(
@@ -74,11 +66,9 @@ public class RichiestaService {
             log.info("✅ Email di convalida inviata a: {}", richiestaSalvata.getEmailSegnalante());
 
         } catch (Exception e) {
-            // ❌ Email fallita MA richiesta già salvata nel DB!
             log.error("⚠️ Impossibile inviare email di convalida a {}: {}",
                     richiestaSalvata.getEmailSegnalante(), e.getMessage());
             log.error("Stack trace completo: ", e);
-            // NON rilanciare eccezione! L'operazione continua con successo.
         }
 
         // 3. Restituisci risposta (SEMPRE successo, anche se email fallisce)
@@ -92,13 +82,12 @@ public class RichiestaService {
             throw new EntityNotFoundException("Token di convalida non valido.");
         }
 
-        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.CONVALIDATA);
+        richiesta.setStato(RichiestaSoccorso.StatoRichiesta.ATTIVA);
         richiesta.setConvalidataAt(LocalDateTime.now());
         richiesta.setUpdatedAt(LocalDateTime.now());
         richiestaSoccorsoRepository.save(richiesta);
         return true;
     }
-
 
     public Page<RichiestaSoccorsoResponse> richiesteFiltrate(String stato, Pageable pageable) {
         Page<RichiestaSoccorso> richiesteEntity;
@@ -182,8 +171,12 @@ public class RichiestaService {
         if (updateRequest.getEmailSegnalante() != null) {
             richiesta.setEmailSegnalante(updateRequest.getEmailSegnalante());
         }
-        if (updateRequest.getFotoUrl() != null) {
-            richiesta.setFotoUrl(updateRequest.getFotoUrl());
+        if (updateRequest.getFoto() != null && updateRequest.getFoto().length > 0) {
+            try {
+                richiesta.setFoto(new javax.sql.rowset.serial.SerialBlob(updateRequest.getFoto()));
+            } catch (java.sql.SQLException e) {
+                throw new RuntimeException("Errore conversione foto in Blob", e);
+            }
         }
         if (updateRequest.getTelefonoSegnalante() != null) {
             richiesta.setTelefonoSegnalante(updateRequest.getTelefonoSegnalante());
@@ -193,41 +186,8 @@ public class RichiestaService {
                     .valueOf(updateRequest.getStato().toUpperCase());
             richiesta.setStato(statoEnum);
         }
-        if (updateRequest.getLivelloSuccesso() != null && richiesta.getMissione() != null) {
-            Missione missione = richiesta.getMissione();
-            missione.setLivelloSuccesso(updateRequest.getLivelloSuccesso());
-            missioneRepository.save(missione);
-        }
-
         richiesta.setUpdatedAt(LocalDateTime.now());
         RichiestaSoccorso richiestaAggiornata = richiestaSoccorsoRepository.save(richiesta);
         return richiestaSoccorsoMapper.toResponse(richiestaAggiornata);
-    }
-
-    public RichiestaSoccorsoResponse valutaRichiesta(Long id, Integer livelloSuccesso) {
-        RichiestaSoccorso richiesta = richiestaSoccorsoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Richiesta non trovata con ID: " + id));
-
-        if (richiesta.getMissione() != null) {
-            Missione missione = richiesta.getMissione();
-            missione.setLivelloSuccesso(livelloSuccesso);
-            missioneRepository.save(missione);
-        } else {
-            throw new IllegalStateException("Impossibile valutare una richiesta senza missione associata");
-        }
-
-        return richiestaSoccorsoMapper.toResponse(richiesta);
-    }
-
-    public List<RichiestaSoccorsoResponse> richiesteValutateNegative() {
-        List<Missione> missioniNegative = missioneRepository.findAll().stream()
-                .filter(m -> m.getLivelloSuccesso() != null && m.getLivelloSuccesso() <= 2)
-                .collect(Collectors.toList());
-
-        List<RichiestaSoccorso> richieste = missioniNegative.stream()
-                .map(Missione::getRichiesta)
-                .collect(Collectors.toList());
-
-        return richiestaSoccorsoMapper.toResponseList(richieste);
     }
 }

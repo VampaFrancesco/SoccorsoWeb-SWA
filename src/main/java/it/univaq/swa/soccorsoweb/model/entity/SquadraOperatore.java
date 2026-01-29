@@ -7,8 +7,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "squadre_operatori", indexes = {
-        @Index(name = "idx_utente_id", columnList = "utente_id")
+@Table(name = "squadra_operatori", indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id")
 })
 @Getter
 @Setter
@@ -26,8 +26,8 @@ public class SquadraOperatore {
     private Squadra squadra;
 
     @ManyToOne
-    @MapsId("utenteId")
-    @JoinColumn(name = "utente_id")
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private User operatore;
 
     @Column(length = 50)
@@ -46,7 +46,7 @@ public class SquadraOperatore {
         @Column(name = "squadra_id")
         private Long squadraId;
 
-        @Column(name = "utente_id")
-        private Long utenteId;
+        @Column(name = "user_id")
+        private Long userId;
     }
 }

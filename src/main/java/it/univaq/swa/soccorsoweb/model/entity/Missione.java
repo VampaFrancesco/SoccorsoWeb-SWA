@@ -1,12 +1,9 @@
 package it.univaq.swa.soccorsoweb.model.entity;
 
-import jakarta.annotation.PreDestroy;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "missioni", indexes = {
+@Table(name = "missione", indexes = {
         @Index(name = "idx_stato", columnList = "stato"),
         @Index(name = "idx_caposquadra", columnList = "caposquadra_id"),
         @Index(name = "idx_squadra", columnList = "squadra_id"),
@@ -91,6 +88,10 @@ public class Missione {
     @Builder.Default
     @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MissioneMateriale> missioniMateriali = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "missione", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<AggiornamentoMissione> aggiornamenti = new HashSet<>();
 
     public enum StatoMissione {
         IN_CORSO, CHIUSA, FALLITA

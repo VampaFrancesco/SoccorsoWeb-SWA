@@ -38,13 +38,11 @@ public class RichiestaSoccorsoUpdateRequest {
     @Email(message = "L'email del segnalante deve essere valida")
     private String emailSegnalante;
 
-    private String fotoUrl;
+    // Foto come byte array (Base64 encoded in JSON)
+    private byte[] foto;
 
     private String telefonoSegnalante;
 
-    private String stato; // INVIATA, CONVALIDATA, IN_CORSO, CHIUSA, ANNULLATA, IGNORATA
+    private String stato;
 
-    @Min(value = 1, message = "Il livello di successo deve essere compreso tra 1 e 10")
-    @Max(value = 10, message = "Il livello di successo deve essere compreso tra 1 e 10")
-    private Integer livelloSuccesso;
 }

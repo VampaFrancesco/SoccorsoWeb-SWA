@@ -8,7 +8,7 @@ import org.mapstruct.*;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = { RoleMapper.class })
+@Mapper(componentModel = "spring", uses = { RoleMapper.class, PatenteMapper.class, AbilitaMapper.class })
 public interface UserMapper {
 
     // ========== Request → Entity (Creazione) ==========
@@ -17,6 +17,8 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "patenti", ignore = true)
+    @Mapping(target = "abilita", ignore = true)
     @Mapping(target = "missioniComeOperatore", ignore = true)
     User toEntity(UserRequest request);
 
@@ -28,12 +30,15 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "patenti", ignore = true)
+    @Mapping(target = "abilita", ignore = true)
     @Mapping(target = "missioniComeOperatore", ignore = true)
     void updateEntityFromDto(UserUpdateRequest request, @MappingTarget User user);
 
     // ========== Entity → Response ==========
     @Mapping(target = "token", ignore = true)
-    @Mapping(target = "disponibile", constant = "true")
+    @Mapping(target = "patenti", ignore = true)
+    @Mapping(target = "abilita", ignore = true)
     UserResponse toResponse(User user);
 
     // ========== List mapping ==========

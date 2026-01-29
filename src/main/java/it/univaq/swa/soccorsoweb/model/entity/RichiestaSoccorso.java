@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "richieste_soccorso", indexes = {
+@Table(name = "richiesta_soccorso", indexes = {
         @Index(name = "idx_email_segnalante", columnList = "email_segnalante"),
         @Index(name = "idx_stato", columnList = "stato"),
         @Index(name = "idx_token", columnList = "token_convalida")
@@ -46,8 +46,9 @@ public class RichiestaSoccorso {
     @Column(name = "telefono_segnalante", length = 20)
     private String telefonoSegnalante;
 
-    @Column(name = "foto_url")
-    private String fotoUrl;
+    @Lob
+    @Column(name = "foto")
+    private java.sql.Blob foto;
 
     @Column(name = "ip_origine", length = 45)
     private String ipOrigine;
@@ -55,16 +56,12 @@ public class RichiestaSoccorso {
     @Column(name = "token_convalida", unique = true)
     private String tokenConvalida;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatoRichiesta stato = StatoRichiesta.INVIATA;
+    private StatoRichiesta stato;
 
     @Column(name = "convalidata_at")
     private LocalDateTime convalidataAt;
-
-    @Column(name = "livello_successo")
-    private Integer livelloSuccesso;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -80,16 +77,6 @@ public class RichiestaSoccorso {
 
     // Enum per lo stato
     public enum StatoRichiesta {
-        INVIATA, ATTIVA, IN_CORSO, CHIUSA, IGNORATA, CONVALIDATA
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        ATTIVA, IN_CORSO, CHIUSA, IGNORATA
     }
 }

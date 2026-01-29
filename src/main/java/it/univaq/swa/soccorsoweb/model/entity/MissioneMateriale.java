@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "missioni_materiali", indexes = {
+@Table(name = "missione_materiali", indexes = {
         @Index(name = "idx_materiale", columnList = "materiale_id")
 })
 @Getter

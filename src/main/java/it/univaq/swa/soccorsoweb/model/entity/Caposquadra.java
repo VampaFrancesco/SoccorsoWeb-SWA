@@ -5,7 +5,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "caposquadra", indexes = {
-        @Index(name = "idx_utente_id", columnList = "utente_id")
+        @Index(name = "idx_user_id", columnList = "user_id")
 })
 @Getter
 @Setter
@@ -19,6 +19,6 @@ public class Caposquadra {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "utente_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User utente;
 }

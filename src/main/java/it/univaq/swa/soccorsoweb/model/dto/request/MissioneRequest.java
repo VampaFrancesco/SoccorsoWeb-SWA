@@ -28,10 +28,28 @@ public class MissioneRequest {
     @NotNull(message = "Il caposquadra è obbligatorio")
     private Long caposquadraId;
 
+    // ID della squadra (opzionale)
+    private Long squadraId;
+
     private String posizione;
     private BigDecimal latitudine;
     private BigDecimal longitudine;
 
     // IDs operatori da assegnare
     private Set<Long> operatoriIds;
+
+    // IDs mezzi da assegnare
+    private Set<Long> mezziIds;
+
+    // IDs materiali da assegnare (con quantità)
+    private Set<MissioneMaterialeAssignment> materiali;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MissioneMaterialeAssignment {
+        private Long materialeId;
+        private Integer quantitaUsata;
+    }
 }

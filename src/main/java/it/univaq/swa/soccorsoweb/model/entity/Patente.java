@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "patenti", indexes = {
+@Table(name = "patente", indexes = {
         @Index(name = "idx_tipo", columnList = "tipo")
 })
 @Getter

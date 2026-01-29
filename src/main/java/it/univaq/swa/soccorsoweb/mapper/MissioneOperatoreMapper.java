@@ -7,16 +7,15 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UserMapper.class })
 public interface MissioneOperatoreMapper {
 
+    // ========== Entity → Response ==========
     @Mapping(target = "missioneId", source = "missione.id")
     @Mapping(target = "operatoreId", source = "operatore.id")
-    @Mapping(target = "operatoreNome", source = "operatore.nome")
-    @Mapping(target = "operatoreCognome", source = "operatore.cognome")
-    @Mapping(target = "operatoreEmail", source = "operatore.email")
+    @Mapping(target = "operatore", source = "operatore")
     MissioneOperatoreResponse toResponse(MissioneOperatore entity);
 
+    // ========== List mapping ==========
     List<MissioneOperatoreResponse> toResponseList(List<MissioneOperatore> entities);
 }
-
