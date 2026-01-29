@@ -21,7 +21,4 @@ public interface RichiestaSoccorsoRepository extends JpaRepository<RichiestaSocc
     Page<RichiestaSoccorso> findByStato(RichiestaSoccorso.StatoRichiesta stato, Pageable pageable);
 
     RichiestaSoccorso findByTokenConvalida(String tokenConvalida);
-
-    @Query("SELECT r FROM RichiestaSoccorso r WHERE r.livelloSuccesso IS NOT NULL AND r.livelloSuccesso < 5 AND r.stato = 'CHIUSA'")  //possiamo valutare solo le richieste chiuse
-    List<RichiestaSoccorso> findAllByLivelloSuccessoAndStato();
 }
