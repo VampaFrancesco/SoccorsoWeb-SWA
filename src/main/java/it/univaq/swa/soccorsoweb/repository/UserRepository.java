@@ -21,14 +21,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT DISTINCT u FROM User u " +
             "JOIN u.roles r " +
-            "WHERE r.nome = 'OPERATORE' " +
+            "WHERE r.name = 'OPERATORE' " +
             "AND u.attivo = true " +
-            "AND (" +
-            "   (:disponibile = true AND u.id NOT IN (SELECT mo.operatore.id FROM MissioneOperatore mo WHERE mo.missione.stato = 'IN_CORSO')) "
-            +
-            "   OR " +
-            "   (:disponibile = false AND u.id IN (SELECT mo.operatore.id FROM MissioneOperatore mo WHERE mo.missione.stato = 'IN_CORSO'))"
-            +
-            ")")
+            "AND ((u.attivo = true AND u.id NOT IN " +
+            "      (SELECT mo.operatore.id FROM MissioneOperatore mo WHERE mo.missione.stato = 'IN_CORSO')) " +
+            "   OR (u.attivo = false AND u.id IN " +
+            "      (SELECT mo.operatore.id FROM MissioneOperatore mo WHERE mo.missione.stato = 'IN_CORSO')))")
     List<User> findOperatoriByDisponibile(@Param("disponibile") boolean disponibile);
+
 }
