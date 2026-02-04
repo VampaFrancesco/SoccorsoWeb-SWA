@@ -1,51 +1,25 @@
 package it.univaq.swa.soccorsoweb.service;
 
-import sendinblue.ApiClient;
-import sendinblue.ApiException;
-import sendinblue.Configuration;
-import sendinblue.auth.ApiKeyAuth;
-import sibModel.*;
-import sibApi.TransactionalEmailsApi;
+import com.resend.Resend;
+import com.resend.core.exception.ResendException;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service
 public class EmailService {
 
-    @Value("${brevo.api.key}")
-    private String brevoApiKey;
+    @Value("${resend.api.key}")
+    private String resendApiKey;
 
-    @Value("${app.mail.from}")
+    @Value("${resend.from.email}")
     private String fromEmail;
 
     public void inviaEmailConvalida(String toEmail, String nomeSegnalante, String linkConvalida) {
-        // Configura API Key
-        ApiClient defaultClient = Configuration.getDefaultApiClient();
-        ApiKeyAuth apiKey = (ApiKeyAuth) defaultClient.getAuthentication("api-key");
-        apiKey.setApiKey(brevoApiKey);
-
-        TransactionalEmailsApi apiInstance = new TransactionalEmailsApi();
-
-        SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
-
-        // Mittente
-        SendSmtpEmailSender sender = new SendSmtpEmailSender();
-        sender.setEmail(fromEmail);
-        sender.setName("SoccorsoWeb");
-        sendSmtpEmail.setSender(sender);
-
-        // Destinatario
-        SendSmtpEmailTo to = new SendSmtpEmailTo();
-        to.setEmail(toEmail);
-        to.setName(nomeSegnalante);
-        sendSmtpEmail.setTo(List.of(to));
-
-        // Contenuto
-        sendSmtpEmail.setSubject("⚠️ Conferma la tua richiesta di soccorso");
+        Resend resend = new Resend(resendApiKey);
 
         String htmlContent = """
                 <!DOCTYPE html>
@@ -93,14 +67,18 @@ public class EmailService {
                 """
                 .formatted(nomeSegnalante, linkConvalida, linkConvalida);
 
-        sendSmtpEmail.setHtmlContent(htmlContent);
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(toEmail)
+                .subject("⚠️ Conferma la tua richiesta di soccorso")
+                .html(htmlContent)
+                .build();
 
         try {
-            CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
-            log.info("✅ Email Brevo/Sendinblue inviata a: {} (Msg ID: {})", toEmail, result.getMessageId());
-        } catch (ApiException e) {
-            log.error("❌ Errore API Brevo: {} - {}", e.getCode(), e.getResponseBody());
-            log.error("Eccezione completa:", e);
+            CreateEmailResponse data = resend.emails().send(params);
+            log.info("✅ Email Resend inviata a: {} (ID: {})", toEmail, data.getId());
+        } catch (ResendException e) {
+            log.error("❌ Errore API Resend: {}", e.getMessage(), e);
         }
     }
 }

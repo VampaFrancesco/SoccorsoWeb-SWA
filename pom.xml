@@ -42,11 +42,12 @@
 
 
 
-		<!-- Brevo (Sendinblue) API Client - Ufficiale Sendinblue SDK V3 -->
+
+		<!-- Resend API Client -->
 		<dependency>
-			<groupId>com.sendinblue</groupId>
-			<artifactId>sib-api-v3-sdk</artifactId>
-			<version>7.0.0</version>
+			<groupId>com.resend</groupId>
+			<artifactId>resend-java</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 
 		<!-- Database -->
