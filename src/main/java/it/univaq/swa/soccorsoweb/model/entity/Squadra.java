@@ -52,13 +52,4 @@ public class Squadra {
     @OneToMany(mappedBy = "squadra", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SquadraOperatore> operatori = new HashSet<>();
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }
