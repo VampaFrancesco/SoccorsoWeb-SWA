@@ -54,7 +54,7 @@ public class Missione {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private StatoMissione stato;
+    private StatoMissione stato = StatoMissione.IN_CORSO;
 
     @Builder.Default
     @Column(name = "inizio_at")
