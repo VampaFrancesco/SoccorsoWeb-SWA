@@ -133,7 +133,7 @@ CREATE TABLE `richiesta_soccorso` (
     `foto` LONGBLOB NULL,
     `ip_origine` VARCHAR(45) NULL,
     `token_convalida` VARCHAR(255) NULL UNIQUE,
-    `stato` ENUM('ATTIVA', 'IN_CORSO', 'CHIUSA', 'IGNORATA') NOT NULL DEFAULT 'ATTIVA',
+    `stato` ENUM('ATTIVA', 'IN_CORSO', 'CHIUSA', 'IGNORATA'),
     `convalidata_at` TIMESTAMP NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -260,7 +260,7 @@ INSERT INTO `role` (`id`, `name`) VALUES
 -- Credenziali: admin / admin
 -- Password hashata con BCrypt (strength 10)
 INSERT INTO `user` (`id`, `email`, `password`, `nome`, `cognome`, `attivo`) VALUES
-    (1, 'admin@soccorsoweb.it', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZRGdjGj/n3H.LCrGxNpHKclGsHqFS', 'Admin', 'Admin', TRUE);
+    (1, 'admin@soccorsoweb.it', '$2a$12$VQE1lW.rgc4Y877S5/d1qu5.ESFJtxqqDUQklcoYwW0yRn6K77dgS', 'Admin', 'Admin', TRUE);
 
 -- Assegnazione ruolo ADMIN all'utente admin
 INSERT INTO `user_role` (`user_id`, `role_id`) VALUES
@@ -270,7 +270,7 @@ INSERT INTO `user_role` (`user_id`, `role_id`) VALUES
 -- Credenziali: operatore@soccorsoweb.it / operatore
 -- Password hashata con BCrypt (strength 10)
 INSERT INTO `user` (`id`, `email`, `password`, `nome`, `cognome`, `attivo`) VALUES
-    (2, 'operatore@soccorsoweb.it', '$2a$10$EixZaYVK1IFz3pPVFCJwRuS1qjFqH./t2LNClr5Ztl0PV9AhmxUaG', 'Operatore', 'Operatore', TRUE);
+    (2, 'operatore@soccorsoweb.it', '$2a$12$CuHtzbebRbw5ID24JQ1hV.qBKBuQzyeEVXvPmILEoHtyEufaALXlS', 'Operatore', 'Operatore', TRUE);
 
 -- Assegnazione ruolo OPERATORE all'utente operatore
 INSERT INTO `user_role` (`user_id`, `role_id`) VALUES
