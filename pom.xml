@@ -41,6 +41,13 @@
 		</dependency>
 
 
+		<!-- Brevo (Sendinblue) API Client -->
+		<dependency>
+			<groupId>com.getbrevo</groupId>
+			<artifactId>brevo-java</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
 		<!-- Database -->
 		<dependency>
 			<groupId>com.h2database</groupId>
