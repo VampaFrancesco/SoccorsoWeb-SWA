@@ -41,11 +41,12 @@
 		</dependency>
 
 
-		<!-- Brevo (Sendinblue) API Client -->
+
+		<!-- Brevo (Sendinblue) API Client - Ufficiale Sendinblue SDK V3 -->
 		<dependency>
-			<groupId>com.getbrevo</groupId>
-			<artifactId>brevo-java</artifactId>
-			<version>1.0.0</version>
+			<groupId>com.sendinblue</groupId>
+			<artifactId>sib-api-v3-sdk</artifactId>
+			<version>7.0.0</version>
 		</dependency>
 
 		<!-- Database -->

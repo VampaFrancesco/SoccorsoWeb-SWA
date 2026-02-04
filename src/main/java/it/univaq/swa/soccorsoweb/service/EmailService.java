@@ -1,16 +1,15 @@
 package it.univaq.swa.soccorsoweb.service;
 
-import brevo.ApiClient;
-import brevo.ApiException;
-import brevo.Configuration;
-import brevo.auth.ApiKeyAuth;
-import brevo.model.*;
-import brevo.api.TransactionalEmailsApi;
+import sendinblue.ApiClient;
+import sendinblue.ApiException;
+import sendinblue.Configuration;
+import sendinblue.auth.ApiKeyAuth;
+import sibModel.*;
+import sibApi.TransactionalEmailsApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -31,20 +30,21 @@ public class EmailService {
 
         TransactionalEmailsApi apiInstance = new TransactionalEmailsApi();
 
-        SendSmtpEmail sendSmtpEmail = new SendSmtpEmail(); // Oggetto email
+        SendSmtpEmail sendSmtpEmail = new SendSmtpEmail();
 
-        // Mittente e Destinatario
+        // Mittente
         SendSmtpEmailSender sender = new SendSmtpEmailSender();
         sender.setEmail(fromEmail);
         sender.setName("SoccorsoWeb");
         sendSmtpEmail.setSender(sender);
 
+        // Destinatario
         SendSmtpEmailTo to = new SendSmtpEmailTo();
         to.setEmail(toEmail);
         to.setName(nomeSegnalante);
         sendSmtpEmail.setTo(List.of(to));
 
-        // Contenuto Email
+        // Contenuto
         sendSmtpEmail.setSubject("⚠️ Conferma la tua richiesta di soccorso");
 
         String htmlContent = """
@@ -84,7 +84,7 @@ public class EmailService {
                             </p>
                         </div>
                         <div class="footer">
-                            <p>Questa è un'email automatica o inviata tramite API Brevo.</p>
+                            <p>Questa è un'email automatica.</p>
                             <p>&copy; 2026 SoccorsoWeb</p>
                         </div>
                     </div>
@@ -97,7 +97,7 @@ public class EmailService {
 
         try {
             CreateSmtpEmail result = apiInstance.sendTransacEmail(sendSmtpEmail);
-            log.info("✅ Email Brevo inviata a: {} (Msg ID: {})", toEmail, result.getMessageId());
+            log.info("✅ Email Brevo/Sendinblue inviata a: {} (Msg ID: {})", toEmail, result.getMessageId());
         } catch (ApiException e) {
             log.error("❌ Errore API Brevo: {} - {}", e.getCode(), e.getResponseBody());
             log.error("Eccezione completa:", e);
