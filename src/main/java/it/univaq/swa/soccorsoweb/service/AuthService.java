@@ -19,8 +19,6 @@
  - 200 OK + UserResponse con token JWT
  */
 
-
-
 package it.univaq.swa.soccorsoweb.service;
 
 import it.univaq.swa.soccorsoweb.mapper.UserMapper;
@@ -48,7 +46,6 @@ import java.util.HashSet;
 @Service
 public class AuthService {
 
-
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final UserMapper userMapper;
@@ -56,15 +53,14 @@ public class AuthService {
 
     // Constructor Injection
     public AuthService(AuthenticationManager authenticationManager,
-                       JWTUtil jwtUtil,
-                       UserRepository userRepository,
-                       UserMapper userMapper) {
+            JWTUtil jwtUtil,
+            UserRepository userRepository,
+            UserMapper userMapper) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userMapper = userMapper;
         this.userRepository = userRepository;
     }
-
 
     public UserResponse login(@NotNull LoginRequest loginRequest) {
 
@@ -78,9 +74,7 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+                        loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -96,11 +90,13 @@ public class AuthService {
     }
 
     public String logout() {
-        // In JWT stateless authentication, logout is typically handled on the client side
+        // In JWT stateless authentication, logout is typically handled on the client
+        // side
         // by simply deleting the token. However, if you want to implement server-side
         // logout logic (e.g., token blacklisting), you can do so here.
 
-        // For now, we'll just return a simple response indicating logout was successful.
+        // For now, we'll just return a simple response indicating logout was
+        // successful.
         return "Logout successful";
     }
 
@@ -108,11 +104,17 @@ public class AuthService {
         if (userRepository.findByEmail(userRequest.getEmail()).isPresent() || userRequest.getEmail().isBlank()) {
             throw new IllegalArgumentException("Email già in uso");
         }
+        if (userRequest.getPassword() == null || userRequest.getPassword().isBlank()) {
+            throw new IllegalArgumentException("La password è obbligatoria");
+        }
         User user = userMapper.toEntity(userRequest);
         user.setPassword(BCrypt.hashpw(userRequest.getPassword(), BCrypt.gensalt()));
-        user.setRoles(new HashSet<>() {{
-            add(new Role(1L, "OPERATORE"));
-        }});
+        // Assign default role: OPERATORE (ID 2L)
+        user.setRoles(new HashSet<>() {
+            {
+                add(new Role(2L, "OPERATORE"));
+            }
+        });
         return userMapper.toResponse(userRepository.save(user));
     }
 }

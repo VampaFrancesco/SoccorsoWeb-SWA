@@ -1,6 +1,7 @@
 package it.univaq.swa.soccorsoweb.service;
 
 import it.univaq.swa.soccorsoweb.mapper.UserMapper;
+import it.univaq.swa.soccorsoweb.model.dto.request.UserRequest;
 import it.univaq.swa.soccorsoweb.model.dto.response.UserResponse;
 import it.univaq.swa.soccorsoweb.model.entity.Role;
 import it.univaq.swa.soccorsoweb.model.entity.User;
@@ -57,5 +58,31 @@ public class OperatoreService {
             throw new IllegalArgumentException("L'utente con ID " + id + " non è un operatore");
         }
         return userMapper.toResponse(operatore);
+    }
+
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException("Utente non trovato con ID: " + id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    public UserResponse getProfile() {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+                .getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente corrente non trovato"));
+        return userMapper.toResponse(user);
+    }
+
+    public UserResponse updateProfile(it.univaq.swa.soccorsoweb.model.dto.request.UserUpdateRequest request) {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+                .getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utente corrente non trovato"));
+
+        userMapper.updateEntityFromDto(request, user);
+
+        return userMapper.toResponse(userRepository.save(user));
     }
 }

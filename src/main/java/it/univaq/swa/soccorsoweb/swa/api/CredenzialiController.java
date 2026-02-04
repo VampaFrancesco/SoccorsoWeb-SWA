@@ -15,7 +15,8 @@ public class CredenzialiController {
 
     @PostMapping() // credenziali?type=operatore oppure type=admin
     public ResponseEntity<Void> nuoveCredenziali(@RequestParam String type) {
-        return ResponseEntity.notFound().build();
+        credenzialiService.generaCredenziali(type);
+        return ResponseEntity.ok().build();
     }
 
 }

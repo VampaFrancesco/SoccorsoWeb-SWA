@@ -96,7 +96,7 @@ public class EmailService {
                         .content { background-color: #f8f9fa; padding: 30px; border-radius: 0 0 5px 5px; }
                         .button { display: inline-block; padding: 15px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
                         .footer { margin-top: 20px; font-size: 12px; color: #666; text-align: center; }
-                        .link-box { background-color: #e9ecef; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 12px; margin-top: 10px; }
+                        .credential-box { background-color: #fff; padding: 15px; border-left: 5px solid #dc3545; margin: 20px 0; }
                     </style>
                 </head>
                 <body>
@@ -105,12 +105,22 @@ public class EmailService {
                             <h1>🚨 SoccorsoWeb</h1>
                         </div>
                         <div class="content">
-                            <h2>Ciao %s,</h2>
-                            <p>Ecco le tue credenziali di accesso al sito <strong></strong> Soccorso Web.</p>
-                            <p>Per attivarla, clicca sul pulsante qui sotto:</p>
+                            <h2>Ciao,</h2>
+                            <p>Ecco le tue nuove credenziali di accesso al portale <strong>Soccorso Web</strong>.</p>
+
+                            <div class="credential-box">
+                                <p><strong>Username:</strong> %s</p>
+                                <p><strong>Password:</strong> %s</p>
+                            </div>
+
+                            <p>Per la tua sicurezza, ti chiediamo di cambiare la password al primo accesso.</p>
+
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="http://localhost:8080/login?action=change-password" class="button">🔄 Accedi e Cambia Password</a>
+                            </div>
 
                             <p style="margin-top: 30px; color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 5px;">
-                                ⚠️ <strong>Importante:</strong> Se non hai effettuato questa richiesta, ignora questa email.
+                                <strong>Importante:</strong> Non condividere queste credenziali con nessuno.
                             </p>
                         </div>
                         <div class="footer">
@@ -120,17 +130,18 @@ public class EmailService {
                     </div>
                 </body>
                 </html>
-                """.formatted(email, password);
+                """
+                .formatted(email, password);
 
         CreateEmailOptions params = CreateEmailOptions.builder()
                 .from(fromEmail)
                 .to(toEmail)
-                .subject("⚠️ Credenziali accesso al portale Soccorso Web")
+                .subject("🔐 Le tue credenziali per Soccorso Web")
                 .html(htmlContent)
                 .build();
         try {
             CreateEmailResponse data = resend.emails().send(params);
-            log.info("✅ Email Resend inviata a: {} (ID: {})", toEmail, data.getId());
+            log.info("✅ Email Credenziali inviata a: {} (ID: {})", toEmail, data.getId());
         } catch (ResendException e) {
             log.error("❌ Errore API Resend: {}", e.getMessage(), e);
         }

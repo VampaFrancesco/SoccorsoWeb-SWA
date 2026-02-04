@@ -17,13 +17,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class UserRequest {
+public class NuovoOperatoreRequest {
 
     @NotBlank(message = "L'email è obbligatoria")
     @Email(message = "L'email deve essere valida")
     private String email;
-
-    private String password;
 
     @NotBlank(message = "Il nome è obbligatorio")
     @Size(max = 100, message = "Il nome non può superare i 100 caratteri")
@@ -39,4 +37,8 @@ public class UserRequest {
     private String telefono;
 
     private String indirizzo;
+
+    @NotBlank(message = "La password è obbligatoria")
+    @Size(min = 6, message = "La password deve contenere almeno 6 caratteri")
+    private String password;
 }
