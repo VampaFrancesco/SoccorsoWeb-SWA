@@ -81,4 +81,59 @@ public class EmailService {
             log.error("❌ Errore API Resend: {}", e.getMessage(), e);
         }
     }
+
+    public void inviaCredenziali(String toEmail, String email, String password) {
+        Resend resend = new Resend(resendApiKey);
+        String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+                        .content { background-color: #f8f9fa; padding: 30px; border-radius: 0 0 5px 5px; }
+                        .button { display: inline-block; padding: 15px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+                        .footer { margin-top: 20px; font-size: 12px; color: #666; text-align: center; }
+                        .link-box { background-color: #e9ecef; padding: 10px; border-radius: 5px; word-break: break-all; font-size: 12px; margin-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <h1>🚨 SoccorsoWeb</h1>
+                        </div>
+                        <div class="content">
+                            <h2>Ciao %s,</h2>
+                            <p>Ecco le tue credenziali di accesso al sito <strong></strong> Soccorso Web.</p>
+                            <p>Per attivarla, clicca sul pulsante qui sotto:</p>
+
+                            <p style="margin-top: 30px; color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 5px;">
+                                ⚠️ <strong>Importante:</strong> Se non hai effettuato questa richiesta, ignora questa email.
+                            </p>
+                        </div>
+                        <div class="footer">
+                            <p>Questa è un'email automatica.</p>
+                            <p>&copy; 2026 SoccorsoWeb</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(email, password);
+
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from(fromEmail)
+                .to(toEmail)
+                .subject("⚠️ Credenziali accesso al portale Soccorso Web")
+                .html(htmlContent)
+                .build();
+        try {
+            CreateEmailResponse data = resend.emails().send(params);
+            log.info("✅ Email Resend inviata a: {} (ID: {})", toEmail, data.getId());
+        } catch (ResendException e) {
+            log.error("❌ Errore API Resend: {}", e.getMessage(), e);
+        }
+    }
+
 }
