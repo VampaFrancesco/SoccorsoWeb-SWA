@@ -107,6 +107,7 @@ public class CredenzialiService {
 
     /**
      * Imposta firstAttempt a false dopo il primo login
+     * 
      * @param email email dell'utente
      */
     @Transactional
@@ -117,5 +118,20 @@ public class CredenzialiService {
         user.setFirstAttempt(false);
         userRepository.save(user);
         log.info("✅ firstAttempt aggiornato a false per utente: {}", email);
+    }
+
+    @Transactional
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato: " + email));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("La vecchia password non è corretta");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setFirstAttempt(false);
+        userRepository.save(user);
+        log.info("✅ Password modificata con successo per utente: {}", email);
     }
 }

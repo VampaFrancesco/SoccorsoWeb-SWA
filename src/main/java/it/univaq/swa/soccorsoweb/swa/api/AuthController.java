@@ -1,5 +1,6 @@
 package it.univaq.swa.soccorsoweb.swa.api;
 
+import it.univaq.swa.soccorsoweb.model.dto.request.ChangePasswordRequest;
 import it.univaq.swa.soccorsoweb.model.dto.request.NuovoOperatoreRequest;
 import it.univaq.swa.soccorsoweb.service.CredenzialiService;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class AuthController {
     /**
      * API: Marca il primo accesso come completato
      * Chiamato dal frontend dopo che l'utente ha fatto il primo login
+     * 
      * @param userDetails Dettagli dell'utente autenticato
      * @return ResponseEntity<Void>
      */
@@ -34,6 +36,15 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> completeFirstLogin(@AuthenticationPrincipal UserDetails userDetails) {
         credenzialiService.setFirstAttemptFalse(userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/change-password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        credenzialiService.changePassword(userDetails.getUsername(), request.getOldPassword(),
+                request.getNewPassword());
         return ResponseEntity.ok().build();
     }
 }
