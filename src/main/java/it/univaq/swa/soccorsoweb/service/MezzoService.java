@@ -43,4 +43,20 @@ public class MezzoService {
         }
         mezzoRepository.deleteById(id);
     }
+
+    @Transactional
+    public MezzoResponse toggleDisponibilita(Long id) {
+        Mezzo mezzo = mezzoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Mezzo non trovato: " + id));
+
+        // Use standard boolean logic allowing for nulls if existing data might be
+        // dirty,
+        // though database constraints suggest it shouldn't be null.
+        // Assuming default is true, if null treat as false -> true.
+        boolean current = Boolean.TRUE.equals(mezzo.getDisponibile());
+        mezzo.setDisponibile(!current);
+
+        mezzo = mezzoRepository.save(mezzo);
+        return mezzoMapper.toResponse(mezzo);
+    }
 }

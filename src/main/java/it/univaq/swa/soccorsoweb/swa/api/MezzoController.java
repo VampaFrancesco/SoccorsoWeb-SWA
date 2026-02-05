@@ -44,4 +44,10 @@ public class MezzoController {
         mezzoService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/disponibilita")
+    @PreAuthorize("hasAnyRole('ADMIN', 'OPERATORE')")
+    public MezzoResponse toggleDisponibilita(@PathVariable Long id) {
+        return mezzoService.toggleDisponibilita(id);
+    }
 }
