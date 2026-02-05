@@ -82,8 +82,8 @@ public class AuthService {
 
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
-        UserResponse response = userMapper.toResponse(user);
 
+        UserResponse response = userMapper.toResponse(user);
 
         response.setToken(token);
 
