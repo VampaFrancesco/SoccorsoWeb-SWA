@@ -73,8 +73,8 @@ public class SecurityConfig {
                         .permitAll()
 
                         // 🔒 Filtri per path specifici (Frontend/Backend)
-                        .requestMatchers("localhost:8080/admin/**").hasRole("ADMIN")
-                        .requestMatchers("localhost:8080/operatore/**").hasRole("OPERATORE")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/operatore/**").hasRole("OPERATORE")
 
                         // 🔒 Endpoint protetti
                         .requestMatchers("/swa/api/**").authenticated()
