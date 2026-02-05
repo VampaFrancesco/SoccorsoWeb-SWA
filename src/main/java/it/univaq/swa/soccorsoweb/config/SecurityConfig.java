@@ -72,6 +72,10 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
 
+                        // 🔒 Filtri per path specifici (Frontend/Backend)
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/operatore/**").hasRole("OPERATORE")
+
                         // 🔒 Endpoint protetti
                         .requestMatchers("/swa/api/**").authenticated()
 
