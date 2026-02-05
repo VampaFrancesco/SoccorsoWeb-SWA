@@ -50,6 +50,10 @@ public class User {
     @Column(nullable = false)
     private Boolean attivo = true;
 
+    @Builder.Default
+    @Column(name = "first_attempt", nullable = false)
+    private Boolean firstAttempt = true;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

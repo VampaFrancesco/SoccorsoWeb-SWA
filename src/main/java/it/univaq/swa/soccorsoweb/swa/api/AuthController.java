@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController("ApiAuthController")
@@ -19,6 +21,19 @@ public class AuthController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> registrazione(@Valid @RequestBody NuovoOperatoreRequest request) {
         credenzialiService.registraNuovoOperatore(request);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * API: Marca il primo accesso come completato
+     * Chiamato dal frontend dopo che l'utente ha fatto il primo login
+     * @param userDetails Dettagli dell'utente autenticato
+     * @return ResponseEntity<Void>
+     */
+    @PutMapping("/complete-first-login")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> completeFirstLogin(@AuthenticationPrincipal UserDetails userDetails) {
+        credenzialiService.setFirstAttemptFalse(userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
 }

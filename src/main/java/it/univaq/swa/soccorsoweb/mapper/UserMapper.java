@@ -14,6 +14,7 @@ public interface UserMapper {
     // ========== Request → Entity (Creazione) ==========
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "attivo", constant = "true")
+    @Mapping(target = "firstAttempt", constant = "true")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "roles", ignore = true)
@@ -27,6 +28,7 @@ public interface UserMapper {
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "attivo", ignore = true)
+    @Mapping(target = "firstAttempt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "roles", ignore = true)

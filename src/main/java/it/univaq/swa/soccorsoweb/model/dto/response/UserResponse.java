@@ -25,6 +25,7 @@ public class UserResponse {
     private String telefono;
     private String indirizzo;
     private Boolean attivo;
+    private Boolean firstAttempt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<RoleResponse> roles;

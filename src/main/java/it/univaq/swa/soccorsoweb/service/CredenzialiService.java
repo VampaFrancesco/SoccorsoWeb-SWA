@@ -2,7 +2,6 @@ package it.univaq.swa.soccorsoweb.service;
 
 import it.univaq.swa.soccorsoweb.mapper.UserMapper;
 import it.univaq.swa.soccorsoweb.model.dto.request.NuovoOperatoreRequest;
-import it.univaq.swa.soccorsoweb.model.dto.request.UserRequest;
 import it.univaq.swa.soccorsoweb.model.entity.Role;
 import it.univaq.swa.soccorsoweb.model.entity.User;
 import it.univaq.swa.soccorsoweb.repository.RoleRepository;
@@ -11,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -103,5 +103,19 @@ public class CredenzialiService {
 
         // Send Email with Raw Password and Link
         emailService.inviaCredenziali(user.getEmail(), user.getEmail(), rawPassword);
+    }
+
+    /**
+     * Imposta firstAttempt a false dopo il primo login
+     * @param email email dell'utente
+     */
+    @Transactional
+    public void setFirstAttemptFalse(String email) {
+        log.info("📝 Aggiornamento firstAttempt per utente: {}", email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato: " + email));
+        user.setFirstAttempt(false);
+        userRepository.save(user);
+        log.info("✅ firstAttempt aggiornato a false per utente: {}", email);
     }
 }
