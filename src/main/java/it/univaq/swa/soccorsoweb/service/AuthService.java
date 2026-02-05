@@ -84,7 +84,7 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Utente non trovato"));
         UserResponse response = userMapper.toResponse(user);
 
-        
+
         response.setToken(token);
 
         return response;

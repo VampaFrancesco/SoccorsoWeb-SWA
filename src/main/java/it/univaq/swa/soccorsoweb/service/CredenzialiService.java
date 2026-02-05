@@ -62,9 +62,6 @@ public class CredenzialiService {
             throw new IllegalArgumentException("Email già in uso: " + request.getEmail());
         }
 
-        // Map base fields manually or use Mapper if we had a method for this DTO.
-        // Since we don't carry password in request, we map manually or use a helper.
-        // Let's map manually to be safe and simple.
         User user = new User();
         user.setEmail(request.getEmail());
         user.setNome(request.getNome());
@@ -73,12 +70,30 @@ public class CredenzialiService {
         user.setTelefono(request.getTelefono());
         user.setIndirizzo(request.getIndirizzo());
         user.setAttivo(true);
-
-        // Assign Role OPERATORE (ID 2)
-        Role operatoreRole = roleRepository.findById(2L)
-                .orElseThrow(() -> new RuntimeException("Ruolo OPERATORE non trovato"));
         user.setRoles(new HashSet<>());
-        user.getRoles().add(operatoreRole);
+
+        if (request.getRuoli() != null && !request.getRuoli().isEmpty()) {
+            request.getRuoli().forEach(r -> {
+                String name = r.getName();
+                Role role = roleRepository.findByName(name)
+                        .or(() -> roleRepository.findByName("ROLE_" + name))
+                        .or(() -> {
+                            // Fallback for legacy IDs if names don't match standard
+                            if ("ADMIN".equalsIgnoreCase(name))
+                                return roleRepository.findById(1L);
+                            if ("OPERATORE".equalsIgnoreCase(name))
+                                return roleRepository.findById(2L);
+                            return java.util.Optional.empty();
+                        })
+                        .orElseThrow(() -> new RuntimeException("Ruolo non trovato: " + name));
+                user.getRoles().add(role);
+            });
+        } else {
+            // Assign Role OPERATORE (ID 2) default
+            Role operatoreRole = roleRepository.findById(2L)
+                    .orElseThrow(() -> new RuntimeException("Ruolo OPERATORE non trovato"));
+            user.getRoles().add(operatoreRole);
+        }
 
         // Password from request
         String rawPassword = request.getPassword();

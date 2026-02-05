@@ -134,14 +134,15 @@ public class EmailService {
                 .formatted(email, password);
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(fromEmail)
-                .to(toEmail)
+                .from("onboarding@resend.dev")
+                .to("francesco.vampa@student.univaq.it")
                 .subject("🔐 Le tue credenziali per Soccorso Web")
                 .html(htmlContent)
                 .build();
         try {
             CreateEmailResponse data = resend.emails().send(params);
-            log.info("✅ Email Credenziali inviata a: {} (ID: {})", toEmail, data.getId());
+            log.info("✅ Email Credenziali inviata a: francesco.vampa@student.univaq.it (Intended for: {}) (ID: {})",
+                    toEmail, data.getId());
         } catch (ResendException e) {
             log.error("❌ Errore API Resend: {}", e.getMessage(), e);
         }
