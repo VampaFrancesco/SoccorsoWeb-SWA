@@ -1,0 +1,196 @@
+api_documentation:
+  info:
+    title: SoccorsoWeb Services API
+    description: List of all endpoints in the application
+    generated_at: 2026-02-06
+
+  controllers:
+    AuthController_API:
+      base_path: /swa/api/auth
+      roles: [AUTHENTICATED, ADMIN]
+      endpoints:
+        - method: POST
+          path: /registrazione
+          description: Registrazione nuovo operatore
+          access: ADMIN
+        - method: PUT
+          path: /complete-first-login
+          description: Marca il primo accesso come completato
+          access: AUTHENTICATED
+        - method: PUT
+          path: /change-password
+          description: Cambio password utente loggato
+          access: AUTHENTICATED
+
+    AuthController_Open:
+      base_path: /swa/open/auth
+      roles: [PUBLIC]
+      endpoints:
+        - method: POST
+          path: /login
+          description: Login utente
+        - method: POST
+          path: /logout
+          description: Logout utente
+        - method: POST
+          path: /sign-up
+          description: Registrazione utente pubblico
+
+    RichiestaApiController:
+      base_path: /swa/api/richieste
+      roles: [ADMIN, OPERATORE]
+      endpoints:
+        - method: GET
+          path: /
+          description: Visualizza richieste filtrate per stato (paginata)
+          params: 
+            - name: stato
+              required: true
+            - name: page
+              default: 0
+            - name: size
+              default: 20
+        - method: PATCH
+          path: /{id}/annullamento
+          description: Annulla richiesta di soccorso
+          access: ADMIN
+        - method: GET
+          path: /{id}
+          description: Dettagli richiesta di soccorso
+        - method: PATCH
+          path: /{id}
+          description: Modifica richiesta di soccorso
+        - method: DELETE
+          path: /{id}
+          description: Elimina richiesta di soccorso
+          access: ADMIN
+        - method: PATCH
+          path: /{id}/stato
+          description: Modifica stato richiesta
+          params: 
+            - name: stato
+              required: true
+
+    RichiestaOpenController:
+      base_path: /swa/open/richieste
+      roles: [PUBLIC]
+      endpoints:
+        - method: POST
+          path: /
+          description: Inserisci nuova richiesta di soccorso
+        - method: POST
+          path: /conferma-convalida
+          description: Conferma convalida richiesta di soccorso via token
+
+    MaterialeController:
+      base_path: /swa/api/materiali
+      roles: [ADMIN]
+      endpoints:
+        - method: GET
+          path: /
+          description: Lista di tutti i materiali
+        - method: GET
+          path: /{id}
+          description: Dettagli materiale
+        - method: POST
+          path: /
+          description: Crea nuovo materiale
+        - method: DELETE
+          path: /{id}
+          description: Elimina materiale
+
+    MezzoController:
+      base_path: /swa/api/mezzi
+      roles: [ADMIN, OPERATORE]
+      endpoints:
+        - method: GET
+          path: /
+          description: Lista di tutti i mezzi
+        - method: GET
+          path: /{id}
+          description: Dettagli mezzo
+        - method: POST
+          path: /
+          description: Crea nuovo mezzo
+        - method: DELETE
+          path: /{id}
+          description: Elimina mezzo (ADMIN)
+          access: ADMIN
+        - method: PATCH
+          path: /{id}/disponibilita
+          description: Toggle disponibilità mezzo
+
+    MissioneController:
+      base_path: /swa/api/missioni
+      roles: [ADMIN, OPERATORE]
+      endpoints:
+        - method: POST
+          path: /
+          description: Inserimento nuova missione
+        - method: PATCH
+          path: /{id}/chiusura
+          description: Chiusura missione
+        - method: GET
+          path: /{id}
+          description: Dettagli missione
+        - method: PATCH
+          path: /{id}
+          description: Modifica missione
+        - method: PATCH
+          path: /{id}/modifica-stato
+          description: Modifica stato missione
+          params: 
+            - name: nuovo_stato
+              required: true
+        - method: DELETE
+          path: /{id}
+          description: Elimina missione (ADMIN)
+          access: ADMIN
+        - method: GET
+          path: /
+          description: Lista di tutte le missioni
+
+    OperatoreController:
+      base_path: /swa/api/operatori
+      roles: [ADMIN, OPERATORE]
+      endpoints:
+        - method: GET
+          path: /
+          description: Visualizza operatori disponibili
+          params: 
+            - name: disponibile
+              default: true
+        - method: GET
+          path: /{id}
+          description: Dettagli operatore
+        - method: GET
+          path: /{id}/missioni
+          description: Lista missioni di uno specifico operatore
+        - method: GET
+          path: /me
+          description: Get current user profile
+        - method: PATCH
+          path: /me
+          description: Update current user profile
+        - method: DELETE
+          path: /{id}
+          description: Elimina operatore (ADMIN)
+          access: ADMIN
+
+    SquadraController:
+      base_path: /swa/api/squadre
+      roles: [ADMIN, OPERATORE]
+      endpoints:
+        - method: GET
+          path: /
+          description: Lista di tutte le squadre
+        - method: GET
+          path: /{id}
+          description: Dettagli squadra
+        - method: POST
+          path: /
+          description: Crea nuova squadra
+        - method: DELETE
+          path: /{id}
+          description: Elimina squadra (ADMIN)
+          access: ADMIN
